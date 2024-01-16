@@ -7,8 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import service.PersonService;
 import model.Person;
-import org.springframework.ui.Model;
-import java.util.List;
+
 
 @Controller
 @RequestMapping("/persons")
@@ -50,19 +49,4 @@ public class PersonController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Person>> geyAllPersons() {
-        List<Person> persons = personService.getAllPersons();
-        return new ResponseEntity<>(persons, HttpStatus.OK);
     }
-
-    @GetMapping("/{firstName}/{lastName}")
-    public ResponseEntity<Person> getPerson(@PathVariable String firstName, @PathVariable String lastName) {
-        Person person = personService.getPersonByFirstNameAndLastName(firstName, lastName);
-        if (person != null) {
-            return new ResponseEntity<>(person, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
-}

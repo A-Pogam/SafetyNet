@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PersonRepository extends JpaRepository<Person, Long> {
-    boolean existByFirstNameAndLastName(String firstName, String lastName);
+
+    boolean existsByFirstNameAndLastName(String firstName, String lastName);
 
     void deleteByFirstNameAndLastName(String firstName, String lastName);
+
 }
