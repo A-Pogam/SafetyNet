@@ -10,6 +10,7 @@ import java.util.List;
 
 @Service
 public class FireStationService {
+
     private final FireStationRepository fireStationRepository;
 
     @Autowired
@@ -17,11 +18,27 @@ public class FireStationService {
         this.fireStationRepository = fireStationRepository;
     }
 
-    public void saveAll(List<FireStation> fireStations) {
-        fireStationRepository.saveAll(fireStations);
+    public FireStation addMapping(FireStation fireStation) {
+        return fireStationRepository.save(fireStation);
     }
 
-    public List<FireStation> getAllFireStations() {
-        return fireStationRepository.findAll();
+    public FireStation updateFireStationNumber(String address, int stationNumber) {
+        FireStation existingMapping = fireStationRepository.findByAddress(address);
+        if (existingMapping != null) {
+            existingMapping.setStation(stationNumber);
+            return fireStationRepository.save(existingMapping);
+        } else {
+            return null;
+        }
+    }
+
+    public boolean deleteMapping(String address) {
+        FireStation existingMapping = fireStationRepository.findByAddress(address);
+        if (existingMapping != null) {
+            fireStationRepository.delete(existingMapping);
+            return true;
+        } else {
+            return false;
+        }
     }
 }
