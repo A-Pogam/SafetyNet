@@ -1,7 +1,6 @@
-package Service;
+package service;
 
 import model.FireStation;
-import model.MedicalRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repository.FireStationRepository;
@@ -22,4 +21,7 @@ public class FireStationService {
         fireStationRepository.saveAll(fireStations);
     }
 
+    public List<FireStation> getAllFireStations() {
+        return fireStationRepository.findAll();
+    }
 }

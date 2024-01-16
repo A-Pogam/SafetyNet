@@ -1,16 +1,14 @@
 package com.SafetyNet.SafetyNet;
 
-import Service.FireStationService;
-import Service.MedicalRecordService;
-import Service.PersonService;
+import service.FireStationService;
+import service.MedicalRecordService;
+import service.PersonService;
 import jakarta.annotation.PostConstruct;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 
-
-import model.MedicalRecord;
 import model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

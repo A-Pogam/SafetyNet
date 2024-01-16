@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import model.MedicalRecord;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,4 +21,7 @@ public class MedicalRecordService {
         medicalRecordRepository.saveAll(medicalRecords);
     }
 
+    public List<MedicalRecord> getAllMedicalRecords() {;
+    return medicalRecordRepository.findAll();
+    }
 }
