@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repository.MedicalRecordRepository;
 
+import java.util.List;
+
 
 @Service
 public class MedicalRecordService {
@@ -20,8 +22,10 @@ public class MedicalRecordService {
         return medicalRecordRepository.save(medicalRecord);
     }
 
-    public MedicalRecord updateMedicalRecord(String firstName, String lastName, MedicalRecord medicalRecord) {
-        MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastName(firstName, lastName);
+    public MedicalRecord updateMedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies, MedicalRecord medicalRecord) {
+        MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(
+                firstName, lastName, birthdate, medications, allergies
+        );
         if (existingRecord != null) {
             existingRecord.setBirthdate(medicalRecord.getBirthdate());
             existingRecord.setMedications(medicalRecord.getMedications());
@@ -32,8 +36,12 @@ public class MedicalRecordService {
         }
     }
 
-    public boolean deleteMedicalRecord(String firstName, String lastName) {
-        MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastName(firstName, lastName);
+
+    public boolean deleteMedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies) {
+        MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(
+                firstName, lastName, birthdate, medications, allergies
+        );
+
         if (existingRecord != null) {
             medicalRecordRepository.delete(existingRecord);
             return true;

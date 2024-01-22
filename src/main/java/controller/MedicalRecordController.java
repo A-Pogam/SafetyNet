@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import service.MedicalRecordService;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/medicalRecord")
 public class MedicalRecordController {
@@ -26,8 +28,22 @@ public class MedicalRecordController {
     }
 
     @PutMapping("/{firstName}/{lastName}")
-    public ResponseEntity<MedicalRecord> updateMedicalRecord(@PathVariable String firstName, @PathVariable String lastName, @RequestBody MedicalRecord medicalRecord) {
-        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(firstName, lastName, medicalRecord);
+    public ResponseEntity<MedicalRecord> updateMedicalRecord(
+            @PathVariable String firstName,
+            @PathVariable String lastName,
+            @RequestParam String birthdate,
+            @RequestParam List<String> medications,
+            @RequestParam List<String> allergies,
+            @RequestBody MedicalRecord medicalRecord
+    ) {
+        medicalRecord.setBirthdate(birthdate);
+        medicalRecord.setMedications(medications);
+        medicalRecord.setAllergies(allergies);
+
+        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(
+                firstName, lastName, birthdate, medications, allergies, medicalRecord
+        );
+
         if (updatedRecord != null) {
             return ResponseEntity.ok(updatedRecord);
         } else {
@@ -35,13 +51,21 @@ public class MedicalRecordController {
         }
     }
 
+
     @DeleteMapping("/{firstName}/{lastName}")
-    public ResponseEntity<Void> deleteMedicalRecord(@PathVariable String firstName, @PathVariable String lastName) {
-        boolean deleted = medicalRecordService.deleteMedicalRecord(firstName, lastName);
+    public ResponseEntity<Void> deleteMedicalRecord(
+            @PathVariable String firstName,
+            @PathVariable String lastName,
+            @RequestParam String birthdate,
+            @RequestParam List<String> medications,
+            @RequestParam List<String> allergies
+    ) {
+        boolean deleted = medicalRecordService.deleteMedicalRecord(firstName, lastName, birthdate, medications, allergies);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
 }

@@ -1,14 +1,11 @@
 package controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
-import java.util.List;
-
+import org.springframework.web.bind.annotation.*;
 import model.FireStation;
 import service.FireStationService;
 
@@ -30,7 +27,10 @@ public class FireStationController {
     }
 
     @PutMapping("/{address}")
-    public ResponseEntity<FireStation> updateFireStationNumber(@PathVariable String address, @RequestParam int stationNumber) {
+    public ResponseEntity<FireStation> updateFireStationNumber(
+            @PathVariable String address,
+            @RequestParam int stationNumber
+    ) {
         FireStation updatedMapping = fireStationService.updateFireStationNumber(address, stationNumber);
         if (updatedMapping != null) {
             return ResponseEntity.ok(updatedMapping);
@@ -48,4 +48,13 @@ public class FireStationController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/delete/{address}")
+    public String showDeleteForm(@PathVariable String address, Model model) {
+        FireStation fireStation = new FireStation();
+        fireStation.setAddress(address);  // Assuming FireStation has setAddress method
+        model.addAttribute("fireStation", fireStation);
+        return "firestation/deleteMapping";
+    }
+
 }

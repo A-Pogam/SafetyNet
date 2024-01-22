@@ -47,7 +47,5 @@ public class SafetyNetApplication {
 		InputStream inputStream = getClass().getResourceAsStream("/data/safety-net-data.json");
 		List<Person> persons = objectMapper.readValue(inputStream, new TypeReference<>() {});
 
-		personService.saveAll(persons);
-
 	}
 }

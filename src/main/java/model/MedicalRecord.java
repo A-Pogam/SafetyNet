@@ -1,9 +1,12 @@
 package model;
 
-import jakarta.persistence.*; //using Entity, id, JoinColum, ElementCollection, list(?), gereratedValue, OnetoOne
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ElementCollection;
 
 import java.util.List;
-
 
 @Entity
 public class MedicalRecord {
@@ -21,6 +24,8 @@ public class MedicalRecord {
 
     @ElementCollection
     private List<String> allergies;
+
+    // Getters and setters
 
     public void setBirthdate(String birthdate) {
         this.birthdate = birthdate;
@@ -45,5 +50,4 @@ public class MedicalRecord {
     public List<String> getAllergies() {
         return allergies;
     }
-
 }
