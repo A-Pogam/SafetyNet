@@ -25,7 +25,23 @@ public class MedicalRecord {
     @ElementCollection
     private List<String> allergies;
 
-    // Getters and setters
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+
 
     public void setBirthdate(String birthdate) {
         this.birthdate = birthdate;
@@ -50,4 +66,5 @@ public class MedicalRecord {
     public List<String> getAllergies() {
         return allergies;
     }
+
 }

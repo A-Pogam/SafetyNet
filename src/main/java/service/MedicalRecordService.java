@@ -22,20 +22,24 @@ public class MedicalRecordService {
         return medicalRecordRepository.save(medicalRecord);
     }
 
-    public MedicalRecord updateMedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies, MedicalRecord medicalRecord) {
+    public MedicalRecord updateMedicalRecord(MedicalRecord updatedMedicalRecord) {
         MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(
-                firstName, lastName, birthdate, medications, allergies
+                updatedMedicalRecord.getFirstName(),
+                updatedMedicalRecord.getLastName(),
+                updatedMedicalRecord.getBirthdate(),
+                updatedMedicalRecord.getMedications(),
+                updatedMedicalRecord.getAllergies()
         );
+
         if (existingRecord != null) {
-            existingRecord.setBirthdate(medicalRecord.getBirthdate());
-            existingRecord.setMedications(medicalRecord.getMedications());
-            existingRecord.setAllergies(medicalRecord.getAllergies());
+            existingRecord.setBirthdate(updatedMedicalRecord.getBirthdate());
+            existingRecord.setMedications(updatedMedicalRecord.getMedications());
+            existingRecord.setAllergies(updatedMedicalRecord.getAllergies());
             return medicalRecordRepository.save(existingRecord);
         } else {
             return null;
         }
     }
-
 
     public boolean deleteMedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies) {
         MedicalRecord existingRecord = medicalRecordRepository.findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(
@@ -50,4 +54,3 @@ public class MedicalRecordService {
         }
     }
 }
-
