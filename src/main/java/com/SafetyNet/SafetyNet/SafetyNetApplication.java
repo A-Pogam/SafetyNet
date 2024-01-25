@@ -27,9 +27,9 @@ import java.util.List;
 import java.util.Map;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.SafetyNet.SafetyNet.model")
-@EnableJpaRepositories(basePackages = "com.SafetyNet.SafetyNet.repository")
-@ComponentScan(basePackages = {"com.SafetyNet.SafetyNet.service"})
+@EntityScan(basePackages = "model")
+@EnableJpaRepositories(basePackages = "repository")
+@ComponentScan(basePackages = {"service"})
 public class SafetyNetApplication {
 
 	@Autowired
