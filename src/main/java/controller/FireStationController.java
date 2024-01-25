@@ -1,12 +1,11 @@
 package controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import model.FireStation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import model.FireStation;
 import service.FireStationService;
 
 @Controller
@@ -15,7 +14,6 @@ public class FireStationController {
 
     private final FireStationService fireStationService;
 
-    @Autowired
     public FireStationController(FireStationService fireStationService) {
         this.fireStationService = fireStationService;
     }
@@ -25,6 +23,7 @@ public class FireStationController {
         FireStation addedMapping = fireStationService.addMapping(fireStation);
         return ResponseEntity.status(HttpStatus.CREATED).body(addedMapping);
     }
+
 
     @PutMapping("/{address}")
     public ResponseEntity<FireStation> updateFireStationNumber(
@@ -52,9 +51,8 @@ public class FireStationController {
     @GetMapping("/delete/{address}")
     public String showDeleteForm(@PathVariable String address, Model model) {
         FireStation fireStation = new FireStation();
-        fireStation.setAddress(address);  // Assuming FireStation has setAddress method
+        fireStation.setAddress(address);  // Assumant que FireStation a une méthode setAddress
         model.addAttribute("fireStation", fireStation);
         return "firestation/deleteMapping";
     }
-
 }
