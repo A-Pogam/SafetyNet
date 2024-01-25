@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import model.Person;
 import org.springframework.stereotype.Service;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 @Service
 public class PersonService {
 
-    private final String jsonFilePath = "src/main/ressources";
+    private final String jsonFilePath = "src/main/resources/data/safety-net-data.json";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<Person> getAllPersons() {

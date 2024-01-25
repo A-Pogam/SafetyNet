@@ -15,10 +15,7 @@ import model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
 
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,20 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-@SpringBootApplication
-@EntityScan(basePackages = "model")
-@EnableJpaRepositories(basePackages = "repository")
-@ComponentScan(basePackages = {"service"})
+@SpringBootApplication(scanBasePackages = {"controller","service","model", "repository"})
 public class SafetyNetApplication {
 
-	@Autowired
-	private PersonService personService;
+	private final PersonService personService;
+	private final MedicalRecordService medicalRecordService;
+	private final FireStationService fireStationService;
 
 	@Autowired
-	private MedicalRecordService medicalRecordService;
+	public SafetyNetApplication(PersonService personService, MedicalRecordService medicalRecordService, FireStationService fireStationService) {
+		this.personService = personService;
+		this.medicalRecordService = medicalRecordService;
+		this.fireStationService = fireStationService;
+	}
 
-	@Autowired
-	private FireStationService fireStationService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(SafetyNetApplication.class, args);
@@ -116,8 +113,4 @@ public class SafetyNetApplication {
 		person.setEmail((String) data.get("email"));
 		return person;
 	}
-
-
-
-
 }

@@ -12,7 +12,6 @@ public class FireStation {
     private String address;
     private int station;
 
-    // Getters and setters
 
     public Long getId() {
         return id;
