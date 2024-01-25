@@ -1,14 +1,17 @@
 package model;
 
-import jakarta.persistence.*; //using Entity, id, GereratedValue, OnetoOne
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
-@Entity //entity JPA(Java Persistence API)/representing a line in DB//Mapped in a table in DB.
+@Entity
 public class Person {
 
-    @Id //Primary key to identify a unique record in DB
-    @GeneratedValue(strategy = GenerationType.IDENTITY) //used to specify how the value of an entity's primary key should be generated when the entity is inserted into the database
-    private Long id; //unique ID of a person
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     private String firstname;
     private String lastname;
     private String address;
@@ -17,6 +20,21 @@ public class Person {
     private String phone;
     private String email;
 
+    @OneToOne(mappedBy = "person")
+    private MedicalRecord medicalRecord;
+
+    // Default constructor
+    public Person() {
+        // Default constructor
+    }
+
+    // Constructor with firstName and lastName
+    public Person(String firstname, String lastname) {
+        this.firstname = firstname;
+        this.lastname = lastname;
+    }
+
+    // Getters and setters for other fields...
 
     public String getFirstname() {
         return firstname;
@@ -73,7 +91,4 @@ public class Person {
     public void setEmail(String email) {
         this.email = email;
     }
-
-    @OneToOne(mappedBy = "person") //One only entry by person, avoid to write again same date for same person
-    private MedicalRecord medicalRecord;
 }
