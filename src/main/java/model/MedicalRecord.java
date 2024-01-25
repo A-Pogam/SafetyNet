@@ -19,10 +19,7 @@ public class MedicalRecord {
     private String lastName;
     private String birthdate;
 
-    @ElementCollection
     private List<String> medications;
-
-    @ElementCollection
     private List<String> allergies;
 
     public String getFirstName() {

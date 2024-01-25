@@ -33,7 +33,7 @@ public class MedicalRecordController {
             @PathVariable String lastName,
             @RequestBody MedicalRecord updatedMedicalRecord
     ) {
-        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(updatedMedicalRecord);
+        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(firstName, lastName, updatedMedicalRecord);
 
         if (updatedRecord != null) {
             return ResponseEntity.ok(updatedRecord);
@@ -42,17 +42,12 @@ public class MedicalRecordController {
         }
     }
 
-
-
     @DeleteMapping("/{firstName}/{lastName}")
     public ResponseEntity<Void> deleteMedicalRecord(
             @PathVariable String firstName,
-            @PathVariable String lastName,
-            @RequestParam String birthdate,
-            @RequestParam List<String> medications,
-            @RequestParam List<String> allergies
+            @PathVariable String lastName
     ) {
-        boolean deleted = medicalRecordService.deleteMedicalRecord(firstName, lastName, birthdate, medications, allergies);
+        boolean deleted = medicalRecordService.deleteMedicalRecord(firstName, lastName);
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
