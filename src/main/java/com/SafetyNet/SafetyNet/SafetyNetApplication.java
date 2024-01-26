@@ -1,15 +1,13 @@
 package com.SafetyNet.SafetyNet;
 
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import model.FireStation;
 import model.MedicalRecord;
 import service.FireStationService;
 import service.MedicalRecordService;
 import service.PersonService;
 import jakarta.annotation.PostConstruct;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
-
 
 import model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +44,9 @@ public class SafetyNetApplication {
 
 	@PostConstruct
 	public void loadData() throws IOException {
-		ObjectMapper objectMapper = new ObjectMapper();
+		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 		InputStream inputStream = getClass().getResourceAsStream("/data/safety-net-data.json");
-		Map<String, List<Map<String, Object>>> data = objectMapper.readValue(inputStream, new TypeReference<>() {
-		});
+		Map<String, List<Map<String, Object>>> data = jsonb.fromJson(inputStream, new HashMap<String, List<Map<String, Object>>>(){}.getClass().getGenericSuperclass());
 
 		// Load MedicalRecord data
 		List<Map<String, Object>> medicalRecordsData = data.get("medicalrecords");
@@ -83,17 +82,20 @@ public class SafetyNetApplication {
 		medicalRecord.setLastName((String) data.get("lastName"));
 		medicalRecord.setBirthdate((String) data.get("birthdate"));
 
-		ObjectMapper objectMapper = new ObjectMapper();
+		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 
-		// using ObjectMapper to convert to List<String>
-		List<String> medications = objectMapper.convertValue(data.get("medications"), new TypeReference<>() {});
-		List<String> allergies = objectMapper.convertValue(data.get("allergies"), new TypeReference<>() {});
+		// Deserialize medications and allergies directly from JSON
+		List<String> medications = jsonb.fromJson(jsonb.toJson(data.get("medications")), new ArrayList<String>(){}.getClass().getGenericSuperclass());
+		List<String> allergies = jsonb.fromJson(jsonb.toJson(data.get("allergies")), new ArrayList<String>(){}.getClass().getGenericSuperclass());
+
+
 
 		medicalRecord.setMedications(medications != null ? medications : new ArrayList<>());
 		medicalRecord.setAllergies(allergies != null ? allergies : new ArrayList<>());
 		return medicalRecord;
-
 	}
+
+
 
 	private FireStation convertToFireStation(Map<String, Object> data) {
 		FireStation fireStation = new FireStation();
