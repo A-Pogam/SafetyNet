@@ -4,76 +4,85 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import model.FireStation;
 import model.MedicalRecord;
+import model.Person;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
 import service.FireStationService;
 import service.MedicalRecordService;
 import service.PersonService;
-import jakarta.annotation.PostConstruct;
-
-import model.Person;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@SpringBootApplication(scanBasePackages = {"controller","service","model", "repository"})
-public class SafetyNetApplication {
+@Component
+@SpringBootApplication
+
+public class SafetyNetApplication implements CommandLineRunner {
+
+	private static final Logger logger = LogManager.getLogger(SafetyNetApplication.class);
+
 
 	private final PersonService personService;
 	private final MedicalRecordService medicalRecordService;
 	private final FireStationService fireStationService;
 
-	@Autowired
 	public SafetyNetApplication(PersonService personService, MedicalRecordService medicalRecordService, FireStationService fireStationService) {
 		this.personService = personService;
 		this.medicalRecordService = medicalRecordService;
 		this.fireStationService = fireStationService;
 	}
 
-
-	public static void main(String[] args) {
-		SpringApplication.run(SafetyNetApplication.class, args);
+	@Override
+	public void run(String... args) {
+		try {
+			loadData();
+		} catch (Exception e) {
+			logger.error("Erreur lors du chargement des données.", e);
+		}
 	}
 
-	@PostConstruct
-	public void loadData() throws IOException {
+	private void loadData() throws IOException {
 		Jsonb jsonb = JsonbBuilder.newBuilder().build();
-		InputStream inputStream = getClass().getResourceAsStream("/data/safety-net-data.json");
-		Map<String, List<Map<String, Object>>> data = jsonb.fromJson(inputStream, new HashMap<String, List<Map<String, Object>>>(){}.getClass().getGenericSuperclass());
 
-		// Load MedicalRecord data
-		List<Map<String, Object>> medicalRecordsData = data.get("medicalrecords");
-		if (medicalRecordsData != null) {
-			for (Map<String, Object> medicalRecordData : medicalRecordsData) {
-				MedicalRecord medicalRecord = convertToMedicalRecord(medicalRecordData);
-				medicalRecordService.addMedicalRecord(medicalRecord);
-			}
-		}
+		ClassPathResource resource = new ClassPathResource("/data/safety-net-data.json");
 
-		// Load FireStation data
-		List<Map<String, Object>> fireStationsData = data.get("firestations");
-		if (fireStationsData != null) {
-			for (Map<String, Object> fireStationData : fireStationsData) {
-				FireStation fireStation = convertToFireStation(fireStationData);
-				fireStationService.addMapping(fireStation);
-			}
-		}
+		String jsonData = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
-		// Load Person data
-		List<Map<String, Object>> personsData = data.get("persons");
-		if (personsData != null) {
-			for (Map<String, Object> personData : personsData) {
-				Person person = convertToPerson(personData);
-				personService.addPerson(person);
-			}
-		}
+		Map<String, List<Map<String, Object>>> data = jsonb.fromJson(jsonData, new HashMap<>() {}.getClass().getGenericSuperclass());
+
+		loadMedicalRecords(data.get("medicalrecords"));
+		loadFireStations(data.get("firestations"));
+		loadPersons(data.get("persons"));
+	}
+
+	private void loadMedicalRecords(List<Map<String, Object>> medicalRecordsData) {
+		medicalRecordsData.forEach(recordData -> {
+			MedicalRecord medicalRecord = convertToMedicalRecord(recordData);
+			medicalRecordService.addMedicalRecord(medicalRecord);
+		});
+	}
+
+	private void loadFireStations(List<Map<String, Object>> fireStationsData) {
+		fireStationsData.forEach(stationData -> {
+			FireStation fireStation = convertToFireStation(stationData);
+			fireStationService.addMapping(fireStation);
+		});
+	}
+
+	private void loadPersons(List<Map<String, Object>> personsData) {
+		personsData.forEach(personData -> {
+			Person person = convertToPerson(personData);
+			personService.addPerson(person);
+		});
 	}
 
 	private MedicalRecord convertToMedicalRecord(Map<String, Object> data) {
@@ -84,18 +93,14 @@ public class SafetyNetApplication {
 
 		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 
-		// Deserialize medications and allergies directly from JSON
-		List<String> medications = jsonb.fromJson(jsonb.toJson(data.get("medications")), new ArrayList<String>(){}.getClass().getGenericSuperclass());
-		List<String> allergies = jsonb.fromJson(jsonb.toJson(data.get("allergies")), new ArrayList<String>(){}.getClass().getGenericSuperclass());
-
-
+		List<String> medications = jsonb.fromJson(jsonb.toJson(data.get("medications")), new ArrayList<>() {}.getClass().getGenericSuperclass());
+		List<String> allergies = jsonb.fromJson(jsonb.toJson(data.get("allergies")), new ArrayList<>() {}.getClass().getGenericSuperclass());
 
 		medicalRecord.setMedications(medications != null ? medications : new ArrayList<>());
 		medicalRecord.setAllergies(allergies != null ? allergies : new ArrayList<>());
+
 		return medicalRecord;
 	}
-
-
 
 	private FireStation convertToFireStation(Map<String, Object> data) {
 		FireStation fireStation = new FireStation();
