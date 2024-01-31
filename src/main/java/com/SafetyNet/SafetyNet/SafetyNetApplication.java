@@ -6,7 +6,9 @@ import model.FireStation;
 import model.MedicalRecord;
 import model.Person;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -25,8 +27,11 @@ import org.apache.logging.log4j.Logger;
 
 @Component
 @SpringBootApplication
-
+@ComponentScan(basePackages = {"service", "model", "controller", "repository"})
 public class SafetyNetApplication implements CommandLineRunner {
+	public static void main(String[] args) {
+		SpringApplication.run(SafetyNetApplication.class, args);
+	}
 
 	private static final Logger logger = LogManager.getLogger(SafetyNetApplication.class);
 
