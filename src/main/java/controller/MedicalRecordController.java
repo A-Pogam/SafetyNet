@@ -1,5 +1,6 @@
 package controller;
 
+import model.FireStation;
 import model.MedicalRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,12 @@ public class MedicalRecordController {
     @Autowired
     public MedicalRecordController(MedicalRecordService medicalRecordService) {
         this.medicalRecordService = medicalRecordService;
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MedicalRecord>> getAllMedicalRecord() {
+        List<MedicalRecord> medicalRecords = medicalRecordService.getAllMedicalRecords();
+        return ResponseEntity.ok(medicalRecords);
     }
 
     @PostMapping

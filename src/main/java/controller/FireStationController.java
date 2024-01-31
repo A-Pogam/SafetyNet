@@ -8,6 +8,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import service.FireStationService;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/firestation")
 public class FireStationController {
@@ -17,6 +19,14 @@ public class FireStationController {
     public FireStationController(FireStationService fireStationService) {
         this.fireStationService = fireStationService;
     }
+
+
+    @GetMapping
+    public ResponseEntity<List<FireStation>> getAllFireStations() {
+        List<FireStation> fireStations = fireStationService.getAllFireStations();
+        return ResponseEntity.ok(fireStations);
+    }
+
 
     @PostMapping
     public ResponseEntity<FireStation> addMapping(@RequestBody FireStation fireStation) {

@@ -1,10 +1,10 @@
 package service;
 
 import model.FireStation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import repository.FireStationRepository;
 
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -12,8 +12,14 @@ public class FireStationService {
 
     private final List<FireStation> fireStations; // Liste pour stocker les FireStations
 
+
     public FireStationService(List<FireStation> fireStations) {
         this.fireStations = fireStations;
+    }
+
+
+    public List<FireStation> getAllFireStations() {
+        return new ArrayList<>(fireStations);
     }
 
     public FireStation addMapping(FireStation fireStation) {

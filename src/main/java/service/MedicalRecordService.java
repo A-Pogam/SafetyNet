@@ -1,6 +1,7 @@
 package service;
 
 import model.MedicalRecord;
+import model.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import repository.MedicalRecordRepository;
@@ -14,6 +15,10 @@ import java.util.List;
 public class MedicalRecordService {
 
     private final List<MedicalRecord> medicalRecords = new ArrayList<>();
+
+    public List<MedicalRecord> getMedicalRecords() {
+        return new ArrayList<>(medicalRecords);
+    }
 
     public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
         medicalRecords.add(medicalRecord);
