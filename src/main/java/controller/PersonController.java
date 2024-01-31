@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import service.PersonService;
 import model.Person;
 
+import java.util.List;
+
 @Controller
-@RequestMapping("/persons")
+@RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
 
@@ -18,13 +20,21 @@ public class PersonController {
         this.personService = personService;
     }
 
+
+    @GetMapping
+    public ResponseEntity<List<Person>> getAllPersons() {
+        List<Person> persons = personService.getAllPersons();
+        return ResponseEntity.ok(persons);
+    }
+
+
     @PostMapping
     public ResponseEntity<String> addPerson(@RequestBody Person person) {
         Person addedPerson = personService.addPerson(person);
         if (addedPerson != null) {
-            return new ResponseEntity<>("Person added successfully", HttpStatus.CREATED);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Person added successfully");
         } else {
-            return new ResponseEntity<>("Failed to add this person", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add this person");
         }
     }
 
