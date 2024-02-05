@@ -5,7 +5,6 @@ import java.util.List;
 public class MedicalRecord {
 
 
-    private Long id;
 
     private String firstName;
     private String lastName;
