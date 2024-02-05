@@ -25,7 +25,7 @@ public class Person {
         this.lastname = lastname;
     }
 
-    // Getters and setters for other fields...
+    // Getters and setters for other fields
 
     public String getFirstname() {
         return firstname;

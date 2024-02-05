@@ -23,6 +23,7 @@ public class MedicalRecordController {
     }
 
     @GetMapping
+    @ResponseBody
     public ResponseEntity<List<MedicalRecord>> getAllMedicalRecord() {
         List<MedicalRecord> medicalRecords = medicalRecordService.getAllMedicalRecords();
         return ResponseEntity.ok(medicalRecords);

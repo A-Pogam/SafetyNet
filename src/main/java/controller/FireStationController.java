@@ -22,6 +22,7 @@ public class FireStationController {
 
 
     @GetMapping
+    @ResponseBody
     public ResponseEntity<List<FireStation>> getAllFireStations() {
         List<FireStation> fireStations = fireStationService.getAllFireStations();
         return ResponseEntity.ok(fireStations);
