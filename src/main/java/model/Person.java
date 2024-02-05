@@ -4,7 +4,6 @@ package model;
 public class Person {
 
 
-    private Long id;
     private String firstname;
     private String lastname;
     private String address;
@@ -18,14 +17,6 @@ public class Person {
     public Person() {
         // Default constructor
     }
-
-    // Constructor with firstName and lastName
-    public Person(String firstname, String lastname) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-    }
-
-    // Getters and setters for other fields
 
     public String getFirstname() {
         return firstname;
@@ -82,4 +73,6 @@ public class Person {
     public void setEmail(String email) {
         this.email = email;
     }
+
+
 }

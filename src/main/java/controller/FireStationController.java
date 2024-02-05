@@ -1,7 +1,9 @@
 package controller;
 
+import dto.FireStationCoverage;
 import model.FireStation;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,7 +12,7 @@ import service.FireStationService;
 
 import java.util.List;
 
-@Controller
+@RestController //no need of ResponseBody with RestController
 @RequestMapping("/firestation")
 public class FireStationController {
 
@@ -22,7 +24,6 @@ public class FireStationController {
 
 
     @GetMapping
-    @ResponseBody
     public ResponseEntity<List<FireStation>> getAllFireStations() {
         List<FireStation> fireStations = fireStationService.getAllFireStations();
         return ResponseEntity.ok(fireStations);
@@ -65,5 +66,15 @@ public class FireStationController {
         fireStation.setAddress(address);  // Assumant que FireStation a une méthode setAddress
         model.addAttribute("fireStation", fireStation);
         return "firestation/deleteMapping";
+    }
+
+    @GetMapping(params = "stationNumber", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam int stationNumber) {
+        FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
+        if (coverage != null) {
+            return ResponseEntity.ok(coverage);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

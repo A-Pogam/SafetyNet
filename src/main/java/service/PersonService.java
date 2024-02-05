@@ -1,6 +1,7 @@
 package service;
 
 
+import model.MedicalRecord;
 import model.Person;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 public class PersonService {
 
     private final List<Person> persons = new ArrayList<>();
+    private final List<MedicalRecord> medicalRecords = new ArrayList<>();
+
 
     public List<Person> getAllPersons() {
         return new ArrayList<>(persons);
@@ -63,5 +66,20 @@ public class PersonService {
                 .findFirst()
                 .orElse(null);
     }
+
+
+    public List<Person> getPersonsByAddress(String address) {
+        return persons.stream()
+                .filter(person -> person.getAddress().equals(address))
+                .collect(Collectors.toList());
+    }
+
+    public MedicalRecord getMedicalRecordByName(String firstName, String lastName) {
+        return medicalRecords.stream()
+                .filter(record -> record.getFirstName().equals(firstName) && record.getLastName().equals(lastName))
+                .findFirst()
+                .orElse(null);
+    }
+
 }
 
