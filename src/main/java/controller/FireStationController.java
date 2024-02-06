@@ -68,7 +68,8 @@ public class FireStationController {
         return "firestation/deleteMapping";
     }
 
-    @GetMapping(params = "stationNumber", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(params = "stationNumber", produces = "application/json")
+    @ResponseBody
     public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam int stationNumber) {
         FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
         if (coverage != null) {
