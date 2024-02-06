@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import java.util.Date;
@@ -56,8 +55,9 @@ public class FireStationService {
     }
 
     public FireStationCoverage getCoverageByStationNumber(int stationNumber) {
-        FireStationCoverage coverage = new FireStationCoverage();
-        List<CoveredPerson> coveredPeople = new ArrayList<>();
+        List<CoveredPerson> coveredPeople = new ArrayList<>(); // Converti en variable locale
+        int adultsCount = 0; // Converti en variable locale
+        int childrenCount = 0; // Converti en variable locale
 
         for (FireStation fireStation : fireStations) {
             if (fireStation.getStation() == stationNumber) {
@@ -67,19 +67,23 @@ public class FireStationService {
                     if (medicalRecord != null) {
                         int age = calculateAge(medicalRecord.getBirthdate());
                         coveredPeople.add(new CoveredPerson(person, age));
+                        if (age > 18) {
+                            adultsCount++;
+                        } else {
+                            childrenCount++;
+                        }
                     }
                 }
             }
         }
 
+        FireStationCoverage coverage = new FireStationCoverage();
         coverage.setCoveredPeople(coveredPeople);
-        coverage.setAdultsCount((int) countAdults(coveredPeople));
-        coverage.setChildrenCount((int) countChildren(coveredPeople));
+        coverage.setAdultsCount(adultsCount);
+        coverage.setChildrenCount(childrenCount);
 
         return coverage;
     }
-
-
 
 
     private int calculateAge(String birthdate) {

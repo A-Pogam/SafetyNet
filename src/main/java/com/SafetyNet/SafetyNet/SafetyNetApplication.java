@@ -125,4 +125,6 @@ public class SafetyNetApplication implements CommandLineRunner {
 		person.setEmail((String) data.get("email"));
 		return person;
 	}
+
+
 }
