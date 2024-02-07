@@ -86,9 +86,13 @@ public class FireStationService {
     }
 
 
-    private int calculateAge(String birthdate) {
+    public int calculateAge(String birthdate) {
+        if (birthdate == null || birthdate.isEmpty()) {
+            return -1; // Date de naissance non spécifiée
+        }
+
         try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
             Date birthDate = sdf.parse(birthdate);
 
             LocalDate localBirthDate = birthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -101,6 +105,7 @@ public class FireStationService {
             return -1; // Valeur par défaut si l'âge ne peut pas être calculé
         }
     }
+
 
     private long countAdults(List<CoveredPerson> coveredPersons) {
         return coveredPersons.stream()

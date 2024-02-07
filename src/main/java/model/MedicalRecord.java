@@ -29,8 +29,6 @@ public class MedicalRecord {
         this.lastName = lastName;
     }
 
-
-
     public void setBirthdate(String birthdate) {
         this.birthdate = birthdate;
     }
