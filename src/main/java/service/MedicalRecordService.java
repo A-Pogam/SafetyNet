@@ -52,4 +52,12 @@ public class MedicalRecordService {
     public List<MedicalRecord> getAllMedicalRecords() {
         return medicalRecords;
     }
+
+
+    public MedicalRecord getMedicalRecordByName(String firstName, String lastName) {
+        return medicalRecords.stream()
+                .filter(record -> record.getFirstName().equals(firstName) && record.getLastName().equals(lastName))
+                .findFirst()
+                .orElse(null);
+    }
 }

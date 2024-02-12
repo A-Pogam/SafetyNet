@@ -1,5 +1,6 @@
 package com.SafetyNet.SafetyNet;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import model.FireStation;
@@ -8,7 +9,9 @@ import model.Person;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
@@ -24,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 
 @Component
 @SpringBootApplication
@@ -125,6 +129,13 @@ public class SafetyNetApplication implements CommandLineRunner {
 		person.setEmail((String) data.get("email"));
 		return person;
 	}
+	@Configuration
+	public class JacksonConfiguration {
 
+		@Bean
+		public ObjectMapper objectMapper() {
+			return new ObjectMapper();
+		}
+	}
 
 }

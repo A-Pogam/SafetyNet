@@ -12,7 +12,6 @@ public class FireStationCoverage {
     @JsonbProperty("childrenCount")
     private int childrenCount;
 
-
     public void setCoveredPeople(List<CoveredPerson> coveredPeople) {
         this.coveredPeople = coveredPeople;
     }

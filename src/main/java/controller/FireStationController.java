@@ -63,7 +63,7 @@ public class FireStationController {
     @GetMapping("/delete/{address}")
     public String showDeleteForm(@PathVariable String address, Model model) {
         FireStation fireStation = new FireStation();
-        fireStation.setAddress(address);  // Assumant que FireStation a une méthode setAddress
+        fireStation.setAddress(address);
         model.addAttribute("fireStation", fireStation);
         return "firestation/deleteMapping";
     }

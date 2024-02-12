@@ -24,7 +24,7 @@ public class ChildAlertController {
         this.fireStationService = fireStationService;
     }
 
-    @GetMapping("/childAlert")
+    /*@GetMapping("/childAlert")
     public ResponseEntity<List<ChildInfo>> getChildAlert(@RequestParam String address) {
         List<Person> residents = personService.getPersonsByAddress(address);
         List<ChildInfo> children = residents.stream()
@@ -54,7 +54,7 @@ public class ChildAlertController {
                 .collect(Collectors.toList());
 
         return new ChildInfo(person.getFirstname(), person.getLastname(), age, householdMembers);
-    }
+    } */
 }
 
 
