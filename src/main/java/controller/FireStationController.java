@@ -5,7 +5,6 @@ import model.FireStation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import service.FireStationService;
@@ -68,8 +67,7 @@ public class FireStationController {
         return "firestation/deleteMapping";
     }
 
-    @GetMapping(params = "stationNumber", produces = "application/json")
-    @ResponseBody
+    @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam int stationNumber) {
         FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
         if (coverage != null) {
