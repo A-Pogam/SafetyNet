@@ -129,13 +129,5 @@ public class SafetyNetApplication implements CommandLineRunner {
 		person.setEmail((String) data.get("email"));
 		return person;
 	}
-	@Configuration
-	public class JacksonConfiguration {
-
-		@Bean
-		public ObjectMapper objectMapper() {
-			return new ObjectMapper();
-		}
-	}
 
 }

@@ -22,7 +22,7 @@ public class FireStationController {
     }
 
 
-    @GetMapping
+    @GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<FireStation>> getAllFireStations() {
         List<FireStation> fireStations = fireStationService.getAllFireStations();
         return ResponseEntity.ok(fireStations);
@@ -67,8 +67,8 @@ public class FireStationController {
         return "firestation/deleteMapping";
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_XML_VALUE)
-    public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam int stationNumber) {
+    @GetMapping
+    public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam("stationNumber") int stationNumber) {
         FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
         if (coverage != null) {
             return ResponseEntity.ok(coverage);
