@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import service.FireStationService;
+import service.MedicalRecordService;
 import service.PersonService;
 
 import java.util.List;
@@ -18,13 +19,15 @@ public class ChildAlertController {
 
     private final PersonService personService;
     private final FireStationService fireStationService;
+    private final MedicalRecordService medicalRecordService;
 
-    public ChildAlertController(PersonService personService, FireStationService fireStationService) {
+    public ChildAlertController(PersonService personService, FireStationService fireStationService, MedicalRecordService medicalRecordService) {
         this.personService = personService;
         this.fireStationService = fireStationService;
+        this.medicalRecordService = medicalRecordService;
     }
 
-    /*@GetMapping("/childAlert")
+    @GetMapping("/childAlert")
     public ResponseEntity<List<ChildInfo>> getChildAlert(@RequestParam String address) {
         List<Person> residents = personService.getPersonsByAddress(address);
         List<ChildInfo> children = residents.stream()
@@ -36,7 +39,7 @@ public class ChildAlertController {
 
     private ChildInfo mapPersonToChildInfo(Person person) {
         // Get medical record for the person
-        MedicalRecord medicalRecord = personService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
+        MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
         if (medicalRecord == null) {
             return null;
         }
@@ -54,7 +57,7 @@ public class ChildAlertController {
                 .collect(Collectors.toList());
 
         return new ChildInfo(person.getFirstname(), person.getLastname(), age, householdMembers);
-    } */
+    }
 }
 
 
