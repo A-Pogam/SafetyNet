@@ -12,7 +12,6 @@ import service.FireStationService;
 import java.util.List;
 
 @RestController //no need of ResponseBody with RestController
-@RequestMapping("/firestation")
 public class FireStationController {
 
     private final FireStationService fireStationService;
@@ -22,7 +21,7 @@ public class FireStationController {
     }
 
 
-    @GetMapping(path = "/all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/firestations")
     public ResponseEntity<List<FireStation>> getAllFireStations() {
         List<FireStation> fireStations = fireStationService.getAllFireStations();
         return ResponseEntity.ok(fireStations);
@@ -67,7 +66,7 @@ public class FireStationController {
         return "firestation/deleteMapping";
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping("/firestation")
     public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam("stationNumber") int stationNumber) {
         FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
         if (coverage != null) {
