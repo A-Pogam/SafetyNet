@@ -2,22 +2,30 @@ package controller;
 
 import dto.FireStationCoverage;
 import model.FireStation;
+import model.MedicalRecord;
+import model.Person;
+import service.MedicalRecordService;
+import service.PersonService;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import service.FireStationService;
 
-import java.util.List;
+import java.util.*;
 
 @RestController //no need of ResponseBody with RestController
 public class FireStationController {
 
     private final FireStationService fireStationService;
+    private final PersonService personService;
+    private final MedicalRecordService medicalRecordService;
 
-    public FireStationController(FireStationService fireStationService) {
+
+    public FireStationController(FireStationService fireStationService, PersonService personService, MedicalRecordService medicalRecordService) {
         this.fireStationService = fireStationService;
+        this.personService = personService;
+        this.medicalRecordService = medicalRecordService;
     }
 
 
@@ -75,4 +83,87 @@ public class FireStationController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/fire")
+    public ResponseEntity<?> getResidentsAndFireStation(@RequestParam("address") String address) {
+        // Récupérer le numéro de la caserne desservant l'adresse donnée
+        Integer fireStationNumber = fireStationService.getFireStationNumberByAddress(address);
+
+        if (fireStationNumber == null) {
+            return ResponseEntity.notFound().build(); // Retourne une réponse 404 si l'adresse n'est pas trouvée
+        }
+
+        // Récupérer les habitants vivant à l'adresse donnée
+        List<Person> residents = personService.getPersonsByAddress(address);
+
+        // Construire la réponse avec les informations des résidents et le numéro de la caserne
+        Map<String, Object> response = new HashMap<>();
+        response.put("fireStationNumber", fireStationNumber);
+        response.put("residents", residents);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/flood/stations")
+    public ResponseEntity<?> getFloodStations(@RequestParam("stations") List<Integer> stationNumbers) {
+        // Créer une liste pour stocker les détails des foyers desservis par chaque caserne
+        List<Map<String, Object>> floodStationsDetails = new ArrayList<>();
+
+        // Pour chaque numéro de caserne spécifié
+        for (Integer stationNumber : stationNumbers) {
+            // Convertir l'entier en une liste contenant un seul élément
+            List<Integer> singleStationNumberList = Collections.singletonList(stationNumber);
+
+            // Récupérer les casernes de pompiers desservant ce numéro de caserne
+            List<FireStation> floodStations = fireStationService.getFloodStations(singleStationNumberList);
+
+            // Pour chaque caserne de pompiers
+            for (FireStation floodStation : floodStations) {
+                // Récupérer l'adresse desservie par cette caserne
+                String address = floodStation.getAddress();
+
+                // Récupérer les personnes vivant à cette adresse
+                List<Person> residents = personService.getPersonsByAddress(address);
+
+                // Créer une liste pour stocker les détails des résidents de cette adresse
+                List<Map<String, Object>> residentsDetails = new ArrayList<>();
+
+                // Pour chaque résident
+                for (Person resident : residents) {
+                    // Créer une carte pour stocker les détails de ce résident
+                    Map<String, Object> residentDetail = new HashMap<>();
+                    residentDetail.put("name", resident.getFirstname() + " " + resident.getLastname());
+                    residentDetail.put("phone", resident.getPhone());
+
+                    // Récupérer le dossier médical de la personne
+                    MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(resident.getFirstname(), resident.getLastname());
+                    if (medicalRecord != null) {
+                        // Calculer l'âge à partir de la date de naissance
+                        int age = fireStationService.calculateAge(medicalRecord.getBirthdate());
+                        residentDetail.put("age", age);
+
+                        // Ajouter les médicaments et allergies
+                        residentDetail.put("medications", medicalRecord.getMedications());
+                        residentDetail.put("allergies", medicalRecord.getAllergies());
+                    }
+
+                    // Ajouter les détails de ce résident à la liste
+                    residentsDetails.add(residentDetail);
+                }
+
+                // Créer une carte pour stocker les détails de cette adresse avec les résidents
+                Map<String, Object> addressDetails = new HashMap<>();
+                addressDetails.put("address", address);
+                addressDetails.put("residents", residentsDetails);
+
+                floodStationsDetails.add(addressDetails);
+            }
+        }
+
+        // Retourner la liste des foyers desservis par les casernes de pompiers spécifiées
+        return ResponseEntity.ok(floodStationsDetails);
+    }
+
+
+
 }

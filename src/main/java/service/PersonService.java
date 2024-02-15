@@ -15,7 +15,6 @@ public class PersonService {
     private final List<Person> persons = new ArrayList<>();
     private final List<MedicalRecord> medicalRecords = new ArrayList<>();
 
-
     public List<Person> getAllPersons() {
         return new ArrayList<>(persons);
     }
@@ -75,6 +74,4 @@ public class PersonService {
     }
 
 
-
 }
-

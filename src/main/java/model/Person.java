@@ -13,11 +13,6 @@ public class Person {
     private String email;
 
 
-    // Default constructor
-    public Person() {
-        // Default constructor
-    }
-
     public String getFirstname() {
         return firstname;
     }

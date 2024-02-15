@@ -8,7 +8,6 @@ import model.MedicalRecord;
 import model.Person;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -16,10 +15,8 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.ZoneId;
-import java.util.ArrayList;
+import java.util.*;
 
-import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -29,10 +26,7 @@ public class FireStationService {
     private final List<FireStation> fireStations;
     private final PersonService personService;
     private final List<Person> persons;
-
     private final MedicalRecordService medicalRecordService;
-
-
 
 
     public FireStationService(List<FireStation> fireStations, PersonService personService, List<Person> persons, MedicalRecordService medicalRecordService) {
@@ -140,27 +134,35 @@ public class FireStationService {
                 .map(FireStation::getAddress)
                 .orElse(null); // Gérer le cas où aucune caserne de pompiers n'est trouvée pour le numéro spécifié
     }
-    private static final Logger logger = LogManager.getLogger(FireStationService.class);
 
     public List<String> getPhoneNumbersServedByFireStations(List<Integer> firestations) {
-        logger.debug("Entering getPhoneNumbersServedByFireStations method with firestations: {}", firestations);
-
         List<String> phoneNumbers = new ArrayList<>();
         for (int firestation : firestations) {
-            String address = getFireStationAddress(firestation);
-            if (address != null) {
-                // Récupérer les numéros de téléphone des résidents desservis par cette caserne
-                List<String> residentPhoneNumbers = persons.stream()
-                        .filter(person -> person.getAddress().equals(address))
-                        .map(Person::getPhone)
-                        .collect(Collectors.toList());
-                phoneNumbers.addAll(residentPhoneNumbers);
-            }
+            List<String> filteredPhoneNumbers = persons.stream()
+                    .filter(person -> fireStations.stream()
+                            .anyMatch(fs -> fs.getStation() == firestation && fs.getAddress().equalsIgnoreCase(person.getAddress())))
+                    .map(Person::getPhone)
+                    .collect(Collectors.toList());
+            phoneNumbers.addAll(filteredPhoneNumbers);
         }
-
-        logger.debug("Phone numbers served by fire stations: {}", phoneNumbers);
         return phoneNumbers;
     }
+
+    public Integer getFireStationNumberByAddress(String address) {
+        for (FireStation fireStation : fireStations) {
+            if (fireStation.getAddress().equalsIgnoreCase(address)) {
+                return fireStation.getStation();
+            }
+        }
+        return null; // Retourne null si l'adresse n'est pas trouvée
+    }
+
+    public List<FireStation> getFloodStations(List<Integer> stationNumbers) {
+        return fireStations.stream()
+                .filter(fs -> stationNumbers.contains(fs.getStation()))
+                .collect(Collectors.toList());
+    }
+
 
 
 }
