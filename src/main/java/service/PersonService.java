@@ -73,5 +73,13 @@ public class PersonService {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getEmailsByCity(String city) {
+        return persons.stream()
+                .filter(person -> person.getCity().equals(city))
+                .map(Person::getEmail)
+                .collect(Collectors.toList());
+    }
+
+
 
 }
