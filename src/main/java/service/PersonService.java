@@ -59,7 +59,7 @@ public class PersonService {
         return getPersonByName(targetPerson.getFirstname(), targetPerson.getLastname()) != null;
     }
 
-    private Person getPersonByName(String firstName, String lastName) {
+    public Person getPersonByName(String firstName, String lastName) {
         return persons.stream()
                 .filter(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName))
                 .findFirst()

@@ -1,5 +1,6 @@
 package controller;
 
+import model.MedicalRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,17 +8,27 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import service.PersonService;
 import model.Person;
+import service.MedicalRecordService;
+import service.FireStationService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/person")
 public class PersonController {
     private final PersonService personService;
+    private final MedicalRecordService medicalRecordService;
+    private final FireStationService fireStationService;
 
-    @Autowired
-    public PersonController(PersonService personService) {
+
+    public PersonController(PersonService personService, MedicalRecordService medicalRecordService, FireStationService fireStationService) {
         this.personService = personService;
+        this.medicalRecordService = medicalRecordService;
+        this.fireStationService = fireStationService;
+
     }
 
 
@@ -68,4 +79,6 @@ public class PersonController {
             return new ResponseEntity<>("Failed to delete this person", HttpStatus.NOT_FOUND);
         }
     }
+
+
 }

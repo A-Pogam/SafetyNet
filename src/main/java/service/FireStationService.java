@@ -137,8 +137,9 @@ public class FireStationService {
 
     public List<String> getPhoneNumbersServedByFireStations(List<Integer> firestations) {
         List<String> phoneNumbers = new ArrayList<>();
+        List<Person> allPersons = personService.getAllPersons();
         for (int firestation : firestations) {
-            List<String> filteredPhoneNumbers = persons.stream()
+            List<String> filteredPhoneNumbers = allPersons.stream()
                     .filter(person -> fireStations.stream()
                             .anyMatch(fs -> fs.getStation() == firestation && fs.getAddress().equalsIgnoreCase(person.getAddress())))
                     .map(Person::getPhone)
@@ -147,6 +148,7 @@ public class FireStationService {
         }
         return phoneNumbers;
     }
+
 
     public Integer getFireStationNumberByAddress(String address) {
         for (FireStation fireStation : fireStations) {
