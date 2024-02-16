@@ -60,6 +60,8 @@ public class SafetyNetApplication implements CommandLineRunner {
 	}
 
 	private void loadData() throws IOException {
+		logger.info("Début du chargement des données...");
+
 		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 
 		ClassPathResource resource = new ClassPathResource("/data/safety-net-data.json");
@@ -71,27 +73,37 @@ public class SafetyNetApplication implements CommandLineRunner {
 		loadMedicalRecords(data.get("medicalrecords"));
 		loadFireStations(data.get("firestations"));
 		loadPersons(data.get("persons"));
+
+		logger.info("Chargement des données terminé.");
 	}
 
 	private void loadMedicalRecords(List<Map<String, Object>> medicalRecordsData) {
+		logger.info("Début du chargement des dossiers médicaux...");
+
 		medicalRecordsData.forEach(recordData -> {
 			MedicalRecord medicalRecord = convertToMedicalRecord(recordData);
 			medicalRecordService.addMedicalRecord(medicalRecord);
 		});
+		logger.info("Chargement des dossiers médicaux terminé.");
 	}
 
 	private void loadFireStations(List<Map<String, Object>> fireStationsData) {
+		logger.info("Début du chargement des dossiers médicaux...");
+
 		fireStationsData.forEach(stationData -> {
 			FireStation fireStation = convertToFireStation(stationData);
 			fireStationService.addMapping(fireStation);
 		});
+		logger.info("Chargement des casernes de pompiers terminé.");
 	}
 
 	private void loadPersons(List<Map<String, Object>> personsData) {
+		logger.info("Début du chargement des dossiers médicaux...");
 		personsData.forEach(personData -> {
 			Person person = convertToPerson(personData);
 			personService.addPerson(person);
 		});
+		logger.info("Chargement des personnes terminé.");
 	}
 
 	private MedicalRecord convertToMedicalRecord(Map<String, Object> data) {
