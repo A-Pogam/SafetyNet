@@ -3,6 +3,7 @@ package service;
 
 import model.MedicalRecord;
 import model.Person;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class PersonService {
             return null;
         }
     }
+
 
     public Person updatePerson(Person updatedPerson) {
         Person existingPerson = getPersonByName(updatedPerson.getFirstname(), updatedPerson.getLastname());
@@ -56,7 +58,9 @@ public class PersonService {
     }
 
     private boolean personExists(Person targetPerson) {
-        return getPersonByName(targetPerson.getFirstname(), targetPerson.getLastname()) != null;
+        return persons.stream()
+                .anyMatch(person -> person.getFirstname().equals(targetPerson.getFirstname())
+                        && person.getLastname().equals(targetPerson.getLastname()));
     }
 
     public Person getPersonByName(String firstName, String lastName) {

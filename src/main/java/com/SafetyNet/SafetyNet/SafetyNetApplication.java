@@ -131,15 +131,15 @@ public class SafetyNetApplication implements CommandLineRunner {
 	}
 
 	private Person convertToPerson(Map<String, Object> data) {
-		Person person = new Person();
-		person.setFirstname((String) data.get("firstName"));
-		person.setLastname((String) data.get("lastName"));
-		person.setAddress((String) data.get("address"));
-		person.setCity((String) data.get("city"));
-		person.setZip((String) data.get("zip"));
-		person.setPhone((String) data.get("phone"));
-		person.setEmail((String) data.get("email"));
-		return person;
+		String firstName = (String) data.get("firstName");
+		String lastName = (String) data.get("lastName");
+		String address = (String) data.get("address");
+		String city = (String) data.get("city");
+		String zip = (String) data.get("zip");
+		String phone = (String) data.get("phone");
+		String email = (String) data.get("email");
+
+		return new Person(firstName, lastName, address, city, zip, phone, email);
 	}
 
 }
