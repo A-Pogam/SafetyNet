@@ -16,9 +16,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Controller
 @RequestMapping("/person")
 public class PersonController {
+    private static final Logger logger = LoggerFactory.getLogger(PersonController.class);
+
     private final PersonService personService;
     private final MedicalRecordService medicalRecordService;
     private final FireStationService fireStationService;
@@ -34,17 +39,22 @@ public class PersonController {
 
     @GetMapping
     public ResponseEntity<List<Person>> getAllPersons() {
+        logger.info("Received request to get all persons.");
         List<Person> persons = personService.getAllPersons();
+        logger.info("Retrieved {} persons.", persons.size());
         return ResponseEntity.ok(persons);
     }
 
 
     @PostMapping
     public ResponseEntity<String> addPerson(@RequestBody Person person) {
+        logger.info("Received request to add person: {}", person);
         Person addedPerson = personService.addPerson(person);
         if (addedPerson != null) {
+            logger.info("Person added successfully: {}", addedPerson);
             return ResponseEntity.status(HttpStatus.CREATED).body("Person added successfully");
         } else {
+            logger.error("Failed to add person: {}", person);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add this person");
         }
     }
@@ -55,6 +65,8 @@ public class PersonController {
             @PathVariable String firstName,
             @PathVariable String lastName,
             @RequestBody Person updatedPerson) {
+        logger.info("Received request to update person: {} {}", firstName, lastName);
+
         // Set the updated person's first name and last name
         updatedPerson.setFirstname(firstName);
         updatedPerson.setLastname(lastName);
@@ -63,8 +75,10 @@ public class PersonController {
         Person updated = personService.updatePerson(updatedPerson);
 
         if (updated != null) {
+            logger.info("Person updated successfully: {}", updated);
             return new ResponseEntity<>("Person updated successfully", HttpStatus.OK);
         } else {
+            logger.error("Failed to update person: {} {}", firstName, lastName);
             return new ResponseEntity<>("Failed to update this person", HttpStatus.NOT_FOUND);
         }
     }
@@ -73,19 +87,24 @@ public class PersonController {
     public ResponseEntity<String> deletePerson(
             @PathVariable String firstName,
             @PathVariable String lastName) {
+        logger.info("Received request to delete person: {} {}", firstName, lastName);
         boolean deleted = personService.deletePerson(firstName, lastName);
         if (deleted) {
+            logger.info("Person deleted successfully: {} {}", firstName, lastName);
             return new ResponseEntity<>("Person deleted successfully", HttpStatus.NO_CONTENT);
         } else {
+            logger.error("Failed to delete person: {} {}", firstName, lastName);
             return new ResponseEntity<>("Failed to delete this person", HttpStatus.NOT_FOUND);
         }
     }
 
     @GetMapping("/personInfo")
     public ResponseEntity<?> getPersonInfo(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName) {
+        logger.info("Received request to get person info: {} {}", firstName, lastName);
         Person person = personService.getPersonByName(firstName, lastName);
 
         if (person == null) {
+            logger.error("Person not found: {} {}", firstName, lastName);
             return ResponseEntity.notFound().build(); // Aucune personne trouvée
         }
 

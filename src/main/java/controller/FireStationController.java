@@ -12,10 +12,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import service.FireStationService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 
 @RestController //no need of ResponseBody with RestController
 public class FireStationController {
+
+    private static final Logger logger = LoggerFactory.getLogger(FireStationController.class);
 
     private final FireStationService fireStationService;
     private final PersonService personService;
@@ -31,13 +36,16 @@ public class FireStationController {
 
     @GetMapping("/firestations")
     public ResponseEntity<List<FireStation>> getAllFireStations() {
+        logger.info("Received request to get all fire stations.");
         List<FireStation> fireStations = fireStationService.getAllFireStations();
+        logger.info("Retrieved {} fire stations.", fireStations.size());
         return ResponseEntity.ok(fireStations);
     }
 
 
     @PostMapping
     public ResponseEntity<FireStation> addMapping(@RequestBody FireStation fireStation) {
+        logger.info("Received request to add fire station mapping: {}", fireStation);
         FireStation addedMapping = fireStationService.addMapping(fireStation);
         return ResponseEntity.status(HttpStatus.CREATED).body(addedMapping);
     }
@@ -48,20 +56,26 @@ public class FireStationController {
             @PathVariable String address,
             @RequestParam int stationNumber
     ) {
+        logger.info("Received request to update fire station number for address: {}, new station number: {}", address, stationNumber);
         FireStation updatedMapping = fireStationService.updateFireStationNumber(address, stationNumber);
         if (updatedMapping != null) {
+            logger.info("Fire station number updated successfully for address: {}", address);
             return ResponseEntity.ok(updatedMapping);
         } else {
+            logger.error("Failed to update fire station number for address: {}", address);
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{address}")
     public ResponseEntity<Void> deleteMapping(@PathVariable String address) {
+        logger.info("Received request to delete fire station mapping for address: {}", address);
         boolean deleted = fireStationService.deleteMapping(address);
         if (deleted) {
+            logger.info("Fire station mapping deleted successfully for address: {}", address);
             return ResponseEntity.noContent().build();
         } else {
+            logger.error("Failed to delete fire station mapping for address: {}", address);
             return ResponseEntity.notFound().build();
         }
     }
@@ -76,16 +90,21 @@ public class FireStationController {
 
     @GetMapping("/firestation")
     public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam("stationNumber") int stationNumber) {
+        logger.info("Received request to get fire station coverage for station number: {}", stationNumber);
         FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
         if (coverage != null) {
+            logger.info("Retrieved fire station coverage for station number: {}", stationNumber);
             return ResponseEntity.ok(coverage);
         } else {
+            logger.error("Failed to retrieve fire station coverage for station number: {}", stationNumber);
             return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("/fire")
     public ResponseEntity<?> getResidentsAndFireStation(@RequestParam("address") String address) {
+        logger.info("Received request to get residents and fire station for address: {}", address);
+
         // Récupérer le numéro de la caserne desservant l'adresse donnée
         Integer fireStationNumber = fireStationService.getFireStationNumberByAddress(address);
 
@@ -106,6 +125,8 @@ public class FireStationController {
 
     @GetMapping("/flood/stations")
     public ResponseEntity<?> getFloodStations(@RequestParam("stations") List<Integer> stationNumbers) {
+        logger.info("Received request to get flood stations for station numbers: {}", stationNumbers);
+
         // Créer une liste pour stocker les détails des foyers desservis par chaque caserne
         List<Map<String, Object>> floodStationsDetails = new ArrayList<>();
 
