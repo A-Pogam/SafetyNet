@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class FireStationService {
+    private static final Logger logger = LogManager.getLogger(FireStationService.class);
+
 
     private final List<FireStation> fireStations;
     private final PersonService personService;
@@ -43,24 +45,37 @@ public class FireStationService {
     }
 
     public FireStation addMapping(FireStation fireStation) {
+        logger.info("Adding fire station mapping: {}", fireStation);
         fireStations.add(fireStation);
+        logger.info("Fire station mapping added successfully");
         return fireStation;
     }
 
     public FireStation updateFireStationNumber(String address, int stationNumber) {
+        logger.info("Updating fire station number for address {}: {}", address, stationNumber);
         for (FireStation existingMapping : fireStations) {
             if (existingMapping.getAddress().equals(address)) {
                 existingMapping.setStation(stationNumber);
+                logger.info("Fire station number updated successfully");
                 return existingMapping;
             }
         }
+        logger.warn("Fire station mapping not found for address: {}", address);
         return null;
     }
     public boolean deleteMapping(String address) {
-        return fireStations.removeIf(existingMapping -> existingMapping.getAddress().equals(address));
+        logger.info("Deleting fire station mapping for address: {}", address);
+        boolean removed = fireStations.removeIf(existingMapping -> existingMapping.getAddress().equals(address));
+        if (removed) {
+            logger.info("Fire station mapping deleted successfully for address: {}", address);
+        } else {
+            logger.warn("No fire station mapping found for address: {}", address);
+        }
+        return removed;
     }
 
     public FireStationCoverage getCoverageByStationNumber(int stationNumber) {
+        logger.info("Fetching coverage for fire station number: {}", stationNumber);
         List<CoveredPerson> coveredPeople = new ArrayList<>(); // Converti en variable locale
         int adultsCount = 0; // Converti en variable locale
         int childrenCount = 0; // Converti en variable locale
@@ -88,12 +103,15 @@ public class FireStationService {
         coverage.setAdultsCount(adultsCount);
         coverage.setChildrenCount(childrenCount);
 
+        logger.info("Coverage fetched successfully for fire station number: {}", stationNumber);
         return coverage;
     }
 
 
     public int calculateAge(String birthdate) {
+        logger.info("Calculating age from birthdate: {}", birthdate);
         if (birthdate == null || birthdate.isEmpty()) {
+            logger.warn("Birthdate is null or empty");
             return -1; // Date de naissance non spécifiée
         }
 
@@ -104,10 +122,14 @@ public class FireStationService {
             LocalDate localBirthDate = birthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
             LocalDate currentDate = LocalDate.now();
 
+
+            int age = Period.between(localBirthDate, currentDate).getYears();
+            logger.info("Age calculated successfully: {}", age);
             return Period.between(localBirthDate, currentDate).getYears();
+
         } catch (ParseException e) {
             // Gérer les erreurs de conversion de date
-            e.printStackTrace();
+            logger.error("Error occurred while parsing birthdate: {}", birthdate, e);
             return -1; // Valeur par défaut si l'âge ne peut pas être calculé
         }
     }
