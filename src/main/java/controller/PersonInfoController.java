@@ -10,11 +10,16 @@ import service.FireStationService;
 import service.MedicalRecordService;
 import service.PersonService;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 public class PersonInfoController {
+    private static final Logger logger = LoggerFactory.getLogger(PersonInfoController.class);
+
 
     private final PersonService personService;
     private final MedicalRecordService medicalRecordService;
@@ -29,9 +34,12 @@ public class PersonInfoController {
     }
     @GetMapping("/personInfo")
     public ResponseEntity<?> getPersonInfo(@RequestParam("firstName") String firstName, @RequestParam("lastName") String lastName) {
+        logger.info("Received request to get information for person: {} {}", firstName, lastName);
+
         Person person = personService.getPersonByName(firstName, lastName);
 
         if (person == null) {
+            logger.error("Person not found: {} {}", firstName, lastName);
             return ResponseEntity.notFound().build(); // Aucune personne trouvée
         }
 
@@ -54,6 +62,7 @@ public class PersonInfoController {
             medicalHistory.put("allergies", medicalRecord.getAllergies());
         }
 
+        logger.info("Retrieved information for person: {} {}", firstName, lastName);
         // Retourner les détails de la personne
         return ResponseEntity.ok(personDetails);
     }

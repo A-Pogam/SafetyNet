@@ -10,9 +10,13 @@ import service.PersonService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 public class PhoneAlertController {
+    private static final Logger logger = LoggerFactory.getLogger(PhoneAlertController.class);
+
 
     private final FireStationService fireStationService;
 
@@ -22,10 +26,13 @@ public class PhoneAlertController {
 
     @GetMapping("/phoneAlert")
     public ResponseEntity<List<String>> getPhoneAlert(@RequestParam("firestation") List<Integer> firestations) {
+        logger.info("Received request to get phone numbers for fire stations: {}", firestations);
         List<String> phoneNumbers = fireStationService.getPhoneNumbersServedByFireStations(firestations);
         if (phoneNumbers.isEmpty()) {
+            logger.warn("No phone numbers found for the provided fire stations: {}", firestations);
             return ResponseEntity.notFound().build(); // Retourne 404 si aucun numéro n'est trouvé
         }
+        logger.info("Retrieved phone numbers for fire stations: {}", firestations);
         return ResponseEntity.ok(phoneNumbers);
     }
 
