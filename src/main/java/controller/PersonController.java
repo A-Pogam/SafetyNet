@@ -113,6 +113,7 @@ public class PersonController {
         personDetails.put("name", person.getFirstname() + " " + person.getLastname());
         personDetails.put("address", person.getAddress());
         personDetails.put("email", person.getEmail());
+        personDetails.put("phone", person.getPhone());
 
         // Récupérer le dossier médical de la personne
         MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
@@ -121,14 +122,19 @@ public class PersonController {
             int age = fireStationService.calculateAge(medicalRecord.getBirthdate());
             personDetails.put("age", age);
 
-            // Ajouter les antécédents médicaux
-            Map<String, Object> medicalHistory = new HashMap<>();
-            medicalHistory.put("medications", medicalRecord.getMedications());
-            medicalHistory.put("allergies", medicalRecord.getAllergies());
+            // Convertir les médicaments en une chaîne de caractères séparée par des virgules
+            String medications = String.join(", ", medicalRecord.getMedications());
+            personDetails.put("medications", medications);
+
+            // Convertir les allergies en une chaîne de caractères séparée par des virgules
+            String allergies = String.join(", ", medicalRecord.getAllergies());
+            personDetails.put("allergies", allergies);
         }
 
         // Retourner les détails de la personne
         return ResponseEntity.ok(personDetails);
     }
+
+
 
 }
