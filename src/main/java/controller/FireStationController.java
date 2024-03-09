@@ -25,12 +25,16 @@ public class FireStationController {
     private final FireStationService fireStationService;
     private final PersonService personService;
     private final MedicalRecordService medicalRecordService;
+    private List<FireStation> fireStations;
 
 
-    public FireStationController(FireStationService fireStationService, PersonService personService, MedicalRecordService medicalRecordService) {
+
+
+    public FireStationController(FireStationService fireStationService, PersonService personService, MedicalRecordService medicalRecordService,  List<FireStation> fireStations) {
         this.fireStationService = fireStationService;
         this.personService = personService;
         this.medicalRecordService = medicalRecordService;
+        this.fireStations = fireStations != null ? fireStations : new ArrayList<>();
     }
 
 
@@ -70,13 +74,21 @@ public class FireStationController {
     @DeleteMapping("/{address}")
     public ResponseEntity<Void> deleteMapping(@PathVariable String address) {
         logger.info("Received request to delete fire station mapping for address: {}", address);
-        boolean deleted = fireStationService.deleteMapping(address);
+
+        // Vérifier si fireStations est null et l'initialiser si nécessaire
+        if (fireStations == null) {
+            fireStations = new ArrayList<>();
+        }
+
+        boolean deleted = fireStationService.deleteMapping(address); // Appel du service pour supprimer la station de pompiers
+
+        // Gestion de la réponse en fonction du résultat de la suppression
         if (deleted) {
             logger.info("Fire station mapping deleted successfully for address: {}", address);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.noContent().build(); // Réponse HTTP 204 (No Content)
         } else {
             logger.error("Failed to delete fire station mapping for address: {}", address);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.notFound().build(); // Réponse HTTP 404 (Not Found)
         }
     }
 
@@ -122,7 +134,6 @@ public class FireStationController {
 
         return ResponseEntity.ok(response);
     }
-
     @GetMapping("/flood/stations")
     public ResponseEntity<?> getFloodStations(@RequestParam("stations") List<Integer> stationNumbers) {
         logger.info("Received request to get flood stations for station numbers: {}", stationNumbers);
@@ -184,7 +195,5 @@ public class FireStationController {
         // Retourner la liste des foyers desservis par les casernes de pompiers spécifiées
         return ResponseEntity.ok(floodStationsDetails);
     }
-
-
 
 }

@@ -1,6 +1,7 @@
 package com.SafetyNet.SafetyNet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import controller.FireStationController;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import model.FireStation;
@@ -31,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 @Component
 @SpringBootApplication
+
 @ComponentScan(basePackages = {"service", "model", "controller", "repository"})
 public class SafetyNetApplication implements CommandLineRunner {
 	public static void main(String[] args) {
@@ -43,11 +45,15 @@ public class SafetyNetApplication implements CommandLineRunner {
 	private final PersonService personService;
 	private final MedicalRecordService medicalRecordService;
 	private final FireStationService fireStationService;
+	private final FireStationController fireStationController;
 
-	public SafetyNetApplication(PersonService personService, MedicalRecordService medicalRecordService, FireStationService fireStationService) {
+
+	public SafetyNetApplication(PersonService personService, MedicalRecordService medicalRecordService, FireStationService fireStationService, FireStationController fireStationController) {
 		this.personService = personService;
 		this.medicalRecordService = medicalRecordService;
 		this.fireStationService = fireStationService;
+		this.fireStationController = fireStationController;
+
 	}
 
 	@Override

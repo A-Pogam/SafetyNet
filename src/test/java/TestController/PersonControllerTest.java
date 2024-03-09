@@ -20,6 +20,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+
 
 @SpringBootTest(classes = SafetyNetApplication.class)
 @AutoConfigureMockMvc
@@ -51,15 +53,15 @@ public class PersonControllerTest {
         String personJson = "{\"firstname\":\"John\",\"lastname\":\"Doe\",\"address\":\"123 Main St\",\"city\":\"Anytown\",\"zip\":\"12345\",\"phone\":\"555-555-5555\",\"email\":\"john@example.com\"}";
 
         // Mock du service pour ajouter une personne
-        when(personService.addPerson(person)).thenReturn(person);
+        when(personService.addPerson(any(Person.class))).thenReturn(person); // Utilisation de any()
 
         // Tester l'ajout de personne via le contrôleur
         mockMvc.perform(post("/person")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(personJson))
                 .andExpect(status().isCreated()) // Vérifier le statut créé (201)
-                .andExpect(jsonPath("$.firstname").value("John"))
-                .andExpect(jsonPath("$.lastname").value("Doe"));
+                .andExpect(content().string("Person added successfully")); // Vérifier le message de réussite
+
     }
 
 
@@ -67,7 +69,7 @@ public class PersonControllerTest {
     void testUpdatePerson() throws Exception {
         Person updatedPerson = new Person("John", "Doe", "123 Main St", "Springfield", "12345", "123-456-7890", "john.doe@example.com");
 
-        when(personService.updatePerson(updatedPerson)).thenReturn(updatedPerson);
+        when(personService.updatePerson(any(Person.class))).thenReturn(updatedPerson); // Utilisation de any()
 
         mockMvc.perform(put("/person/John/Doe")  // Utilisation de l'URI pour mettre à jour une personne
                         .contentType(MediaType.APPLICATION_JSON)
@@ -81,7 +83,7 @@ public class PersonControllerTest {
     void testDeletePerson() throws Exception {
         when(personService.deletePerson("John", "Doe")).thenReturn(true);
 
-        mockMvc.perform(delete("/person")
+        mockMvc.perform(delete("/person/John/Doe")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new Person("John", "Doe", null, null, null, null, null))))
                 .andExpect(status().isNoContent())

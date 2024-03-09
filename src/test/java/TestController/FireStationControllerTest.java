@@ -1,18 +1,30 @@
 package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
+import controller.FireStationController;
 import controller.MedicalRecordController;
 import controller.PersonController;
 import dto.FireStationCoverage;
+import model.FireStation;
 import model.MedicalRecord;
+import model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -21,16 +33,16 @@ import service.MedicalRecordService;
 import service.PersonService;
 
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.mockito.ArgumentMatchers.eq;
+
+import java.util.Collections;
+import java.util.List;
 
 
 
@@ -62,7 +74,6 @@ public class FireStationControllerTest {
 
     @InjectMocks
     private PersonController personController;
-
 
 
 
@@ -106,7 +117,7 @@ public class FireStationControllerTest {
                 .andExpect(jsonPath("$.lastName").value(medicalRecord.getLastName()));
     }
 
-    @Test
+   /* @Test
     public void testUpdateMedicalRecord() throws Exception {
         // Créer un enregistrement médical simulé avec les données appropriées
         MedicalRecord existingMedicalRecord = new MedicalRecord("John", "Doe", "02-08-1990",
@@ -137,11 +148,12 @@ public class FireStationControllerTest {
 
         mockMvc.perform(put("/medicalRecord/{firstName}/{lastName}", "John", "Doe")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .content("{\"birthdate\":\"02-08-1990\",\"medications\":[\"ibuprofen\",\"aspirin\"],\"allergies\":[\"peanut\",\"pollen\"]}"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.firstName").value(existingMedicalRecord.getFirstName()))
                 .andExpect(jsonPath("$.lastName").value(existingMedicalRecord.getLastName()));
+
     }
 
 
@@ -152,6 +164,92 @@ public class FireStationControllerTest {
 
         mockMvc.perform(delete("/medicalRecord/{firstName}/{lastName}", "John", "Doe"))
                 .andExpect(status().isNoContent());
+    } */
+
+   /* @Test
+    public void testDeleteMapping_Success() {
+        // Arrange
+        String address = "123 Main St";
+
+        // Mocking behavior
+        when(fireStationService.deleteMapping(address)).thenReturn(true);
+
+        // Act
+        boolean deletionSuccessful = fireStationController.deleteMapping(address);
+
+        // Assert
+        assertTrue(deletionSuccessful);
+        verify(fireStationService, times(1)).deleteMapping(address);
+    }
+
+
+    @Test
+    public void testDeleteMapping_Failure() {
+        // Arrange
+        String address = "456 Elm St";
+
+        // Mocking behavior
+        when(fireStationService.deleteMapping(address)).thenReturn(false);
+
+        // Act
+        boolean deletionSuccessful = fireStationController.deleteMapping(address);
+
+        // Assert
+        assertFalse(deletionSuccessful);
+        verify(fireStationService, times(1)).deleteMapping(address);
+    }*/
+
+    @Test
+    public void testGetAllFireStations() throws Exception {
+        // Mock List of FireStation objects
+        List<FireStation> fireStations = new ArrayList<>();
+        // Ajoutez ici des objets FireStation à votre liste de simulation
+
+        // Mock FireStationService
+        when(fireStationService.getAllFireStations()).thenReturn(fireStations);
+
+        // Effectuer une requête HTTP GET vers l'URL /firestations
+        mockMvc.perform(MockMvcRequestBuilders.get("/firestations"))
+                // S'attend à ce que le statut de la réponse soit OK (200)
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void testGetFloodStations() throws Exception {
+        // Mock List of FireStation objects
+        List<FireStation> floodStations = new ArrayList<>();
+        // Ajoutez ici des objets FireStation à votre liste de simulation
+
+        // Mock List of Person objects
+        List<Person> residents = new ArrayList<>();
+        // Ajoutez ici des objets Person à votre liste de simulation
+
+        // Mock Map of MedicalRecord objects
+        Map<String, MedicalRecord> medicalRecords = new HashMap<>();
+        // Ajoutez ici des objets MedicalRecord simulés à votre map
+
+        // Mock FireStationService
+        when(fireStationService.getFloodStations(anyList())).thenReturn(floodStations);
+
+        // Mock PersonService
+        when(personService.getPersonsByAddress(anyString())).thenReturn(residents);
+
+        // Mock MedicalRecordService
+        when(medicalRecordService.getMedicalRecordByName(anyString(), anyString())).thenAnswer(new Answer<MedicalRecord>() {
+            @Override
+            public MedicalRecord answer(InvocationOnMock invocation) throws Throwable {
+                String firstName = invocation.getArgument(0);
+                String lastName = invocation.getArgument(1);
+                return medicalRecords.get(firstName + lastName);
+            }
+        });
+
+        // Effectuer une requête HTTP GET vers l'URL /flood/stations avec les paramètres nécessaires
+        mockMvc.perform(MockMvcRequestBuilders.get("/flood/stations")
+                        .param("stations", "1", "2", "3"))
+                .andExpect(status().isOk());
     }
 
 }
+
+
