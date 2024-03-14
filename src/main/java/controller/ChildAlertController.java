@@ -44,7 +44,7 @@ public class ChildAlertController {
         return ResponseEntity.ok(children);
     }
 
-    private ChildInfo mapPersonToChildInfo(Person person) {
+    public ChildInfo mapPersonToChildInfo(Person person) {
         // Get medical record for the person
         MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
         if (medicalRecord == null) {

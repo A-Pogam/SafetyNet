@@ -2,6 +2,7 @@ package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import controller.PersonInfoController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -110,44 +111,4 @@ public class PersonControllerTest {
                 .andExpect(content().string("Person deleted successfully"));
     }
 
-    @Test
-    public void testGetPersonInfo() {
-        // Créer un objet Person
-        Person person = new Person("John", "Doe", "123 Main St", "Wonderland", "42", "1234567890", "john@example.com");
-
-        // Créer un objet MedicalRecord
-        MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setBirthdate("01/01/1990");
-        List<String> medications = new ArrayList<>();
-        medications.add("Medicine1");
-        medications.add("Medicine2");
-        medicalRecord.setMedications(medications);
-
-        List<String> allergies = new ArrayList<>();
-        allergies.add("Pollen");
-        medicalRecord.setAllergies(allergies);
-
-        // Définir le comportement des services mockés
-        when(personService.getPersonByName("John", "Doe")).thenReturn(person);
-        when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(medicalRecord);
-        when(fireStationService.calculateAge("01/01/1990")).thenReturn(32); // Mocking the age calculation
-
-        // Appeler la méthode à tester
-        ResponseEntity<?> responseEntity = personController.getPersonInfo("John", "Doe");
-
-        // Vérifier si la réponse est OK
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-        // Vérifier les détails de la personne dans la réponse
-        Map<String, Object> expectedDetails = new HashMap<>();
-        expectedDetails.put("name", "John Doe");
-        expectedDetails.put("address", "123 Main St");
-        expectedDetails.put("email", "john@example.com");
-        expectedDetails.put("phone", "1234567890");
-        expectedDetails.put("age", 32);
-        expectedDetails.put("medications", "Medicine1, Medicine2");
-        expectedDetails.put("allergies", "Pollen");
-
-        assertEquals(expectedDetails, responseEntity.getBody());
-    }
 }

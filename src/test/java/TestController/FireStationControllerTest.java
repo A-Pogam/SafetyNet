@@ -1,6 +1,7 @@
 package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller.FireStationController;
 import controller.MedicalRecordController;
 import controller.PersonController;
@@ -17,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +78,10 @@ public class FireStationControllerTest {
     @InjectMocks
     private PersonController personController;
 
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
 
     @Test
@@ -197,7 +204,7 @@ public class FireStationControllerTest {
         // Assert
         assertFalse(deletionSuccessful);
         verify(fireStationService, times(1)).deleteMapping(address);
-    }*/
+    } */
 
     @Test
     public void testGetAllFireStations() throws Exception {

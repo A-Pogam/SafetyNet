@@ -30,6 +30,7 @@ public class FireStationController {
 
 
 
+
     public FireStationController(FireStationService fireStationService, PersonService personService, MedicalRecordService medicalRecordService,  List<FireStation> fireStations) {
         this.fireStationService = fireStationService;
         this.personService = personService;
