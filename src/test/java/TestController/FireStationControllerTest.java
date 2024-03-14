@@ -69,8 +69,9 @@ public class FireStationControllerTest {
     @Mock
     private PersonService personService;
 
+
     @InjectMocks
-    private FireStationService fireStationController;
+    private FireStationController fireStationController;
 
     @InjectMocks
     private MedicalRecordController medicalRecordController;
@@ -257,6 +258,38 @@ public class FireStationControllerTest {
                 .andExpect(status().isOk());
     }
 
-}
+    @Test
+    public void testGetResidentsAndFireStation_Success() {
+        // Given
+        String address = "123 Main St";
+
+        // Mocking the behavior of personService
+        List<Person> residents = new ArrayList<>();
+        residents.add(new Person("John", "Doe", "123 Main St", "Légume", "12", "1234", "john@exemple.com"));
+        residents.add(new Person("Jane", "Doe", "12 rue de la courgette", "Légume", "12", "1234", "jane@exemple.com"));
+
+        // Mocking the behavior of fireStationService
+        FireStationService fireStationService = mock(FireStationService.class);
+        PersonService personService = mock(PersonService.class);
+        MedicalRecordService medicalRecordService = mock(MedicalRecordService.class);
+
+        // Creating a list of FireStation
+        List<model.FireStation> fireStations = new ArrayList<>();
+        fireStations.add(new model.FireStation("123 Main St", Integer.valueOf(1)));
+
+        // Creating the controller with mocked services and the list of FireStation
+        FireStationController fireStationController = new FireStationController(fireStationService, personService, medicalRecordService, fireStations);
+
+        // Mocking the expected behavior when calling methods on mocked services
+        when(fireStationService.getFireStationNumberByAddress(address)).thenReturn(1); // Assuming the fire station number for this address is 1
+        when(personService.getPersonsByAddress(address)).thenReturn(residents);
+
+        // Calling the method to be tested
+        ResponseEntity<?> responseEntity = fireStationController.getResidentsAndFireStation(address);
+
+        // Assertions on the response
+        assertEquals(200, responseEntity.getStatusCodeValue()); // Assuming the expected status code is 200
+    }
+    }
 
 
