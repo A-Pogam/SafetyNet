@@ -53,16 +53,22 @@ public class FireStationService {
 
     public FireStation updateFireStationNumber(String address, int stationNumber) {
         logger.info("Updating fire station number for address {}: {}", address, stationNumber);
-        for (FireStation existingMapping : fireStations) {
-            if (existingMapping.getAddress().equals(address)) {
-                existingMapping.setStation(stationNumber);
-                logger.info("Fire station number updated successfully");
-                return existingMapping;
+        if (fireStations != null) {
+            for (FireStation existingMapping : fireStations) {
+                if (existingMapping.getAddress().equals(address)) {
+                    existingMapping.setStation(stationNumber);
+                    logger.info("Fire station number updated successfully");
+                    return existingMapping;
+                }
             }
+        } else {
+            logger.warn("Fire stations list is null");
         }
         logger.warn("Fire station mapping not found for address: {}", address);
         return null;
     }
+
+
     public boolean deleteMapping(String address) {
         logger.info("Deleting fire station mapping for address: {}", address);
         boolean removed = fireStations.removeIf(existingMapping -> existingMapping.getAddress().equals(address));
