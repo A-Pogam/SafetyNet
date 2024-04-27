@@ -1,11 +1,11 @@
-package service;
+package com.SafetyNet.SafetyNet.service;
 
-import dto.CoveredPerson;
-import dto.FireStationCoverage;
-import model.FireStation;
+import com.SafetyNet.SafetyNet.dto.CoveredPerson;
+import com.SafetyNet.SafetyNet.dto.FireStationCoverage;
+import com.SafetyNet.SafetyNet.model.FireStation;
 
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;

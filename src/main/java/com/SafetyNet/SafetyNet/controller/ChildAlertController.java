@@ -1,15 +1,15 @@
-package controller;
+package com.SafetyNet.SafetyNet.controller;
 
-import dto.ChildInfo;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.dto.ChildInfo;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import service.FireStationService;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

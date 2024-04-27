@@ -1,6 +1,6 @@
-package dto;
+package com.SafetyNet.SafetyNet.dto;
 
-import model.Person;
+import com.SafetyNet.SafetyNet.model.Person;
 
 import java.util.List;
 

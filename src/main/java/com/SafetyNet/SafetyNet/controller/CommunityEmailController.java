@@ -1,16 +1,18 @@
-package controller;
+package com.SafetyNet.SafetyNet.controller;
 
+import com.SafetyNet.SafetyNet.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import service.PersonService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,13 +29,12 @@ public class CommunityEmailController {
 
     @GetMapping("/communityEmail")
     public ResponseEntity<List<String>> getEmailsByCity(@RequestParam("city") String city) {
-        logger.info("Received request to get emails for city: {}", city);
         List<String> emails = personService.getEmailsByCity(city);
         if (emails != null) {
-            logger.info("Found {} emails for city: {}", emails.size(), city);
-            return ResponseEntity.ok(emails);
+            Set<String> uniqueEmails = new HashSet<>(emails);
+            List<String> uniqueEmailsList = uniqueEmails.stream().collect(Collectors.toList());
+            return ResponseEntity.ok(uniqueEmailsList);
         } else {
-            logger.error("Failed to retrieve emails for city: {}", city);
             return ResponseEntity.notFound().build();
         }
     }

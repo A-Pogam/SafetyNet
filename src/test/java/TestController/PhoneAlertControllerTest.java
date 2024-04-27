@@ -1,6 +1,6 @@
 package TestController;
 
-import controller.PhoneAlertController;
+import com.SafetyNet.SafetyNet.controller.PhoneAlertController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import service.FireStationService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
 
 import java.util.ArrayList;
 import java.util.List;

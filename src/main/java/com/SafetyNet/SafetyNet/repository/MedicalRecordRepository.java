@@ -1,6 +1,6 @@
-package repository;
+package com.SafetyNet.SafetyNet.repository;
 
-import model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
 
 import java.util.List;
 

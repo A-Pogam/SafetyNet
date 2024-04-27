@@ -1,5 +1,8 @@
-package model;
+package com.SafetyNet.SafetyNet.model;
 
+import jakarta.persistence.Entity;
+
+@Entity
 public class FireStation {
     private String address;
     private int station;

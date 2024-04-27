@@ -2,9 +2,9 @@ package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import controller.PersonInfoController;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.controller.PersonInfoController;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -14,9 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import service.FireStationService;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

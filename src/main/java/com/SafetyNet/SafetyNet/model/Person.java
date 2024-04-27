@@ -1,6 +1,8 @@
-package model;
+package com.SafetyNet.SafetyNet.model;
 
+import jakarta.persistence.Entity;
 
+@Entity
 public class Person {
 
 

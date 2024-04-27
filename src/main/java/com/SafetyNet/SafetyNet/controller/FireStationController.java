@@ -1,16 +1,16 @@
-package controller;
+package com.SafetyNet.SafetyNet.controller;
 
-import dto.FireStationCoverage;
-import model.FireStation;
-import model.MedicalRecord;
-import model.Person;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.dto.FireStationCoverage;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
+import com.SafetyNet.SafetyNet.model.FireStation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import service.FireStationService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

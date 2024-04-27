@@ -1,13 +1,12 @@
-package controller;
+package com.SafetyNet.SafetyNet.controller;
 
-import model.FireStation;
-import model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

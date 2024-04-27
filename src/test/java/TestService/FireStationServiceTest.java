@@ -1,23 +1,15 @@
 package TestService;
 
-import dto.CoveredPerson;
-import dto.FireStationCoverage;
-import model.FireStation;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.model.FireStation;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import service.FireStationService;
-import service.PersonService;
-import service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.PersonService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

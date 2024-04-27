@@ -1,17 +1,17 @@
 package TestController;
 
-import controller.ChildAlertController;
-import dto.ChildInfo;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.controller.ChildAlertController;
+import com.SafetyNet.SafetyNet.dto.ChildInfo;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import service.FireStationService;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,10 +1,7 @@
-package service;
+package com.SafetyNet.SafetyNet.service;
 
-import model.MedicalRecord;
-import model.Person;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import org.springframework.stereotype.Service;
-import repository.MedicalRecordRepository;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

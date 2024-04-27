@@ -1,7 +1,10 @@
-package model;
+package com.SafetyNet.SafetyNet.model;
+
+import jakarta.persistence.Entity;
 
 import java.util.List;
 
+@Entity
 public class MedicalRecord {
 
 

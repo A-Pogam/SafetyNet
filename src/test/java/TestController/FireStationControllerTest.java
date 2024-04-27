@@ -1,14 +1,13 @@
 package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import controller.FireStationController;
-import controller.MedicalRecordController;
-import controller.PersonController;
-import dto.FireStationCoverage;
-import model.FireStation;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.controller.FireStationController;
+import com.SafetyNet.SafetyNet.controller.MedicalRecordController;
+import com.SafetyNet.SafetyNet.controller.PersonController;
+import com.SafetyNet.SafetyNet.dto.FireStationCoverage;
+import com.SafetyNet.SafetyNet.model.FireStation;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,22 +17,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import service.FireStationService;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
 
 
 import java.util.*;
@@ -44,7 +41,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.mockito.ArgumentMatchers.eq;
 
-import java.util.Collections;
 import java.util.List;
 
 
@@ -226,15 +222,12 @@ public class FireStationControllerTest {
     public void testGetFloodStations() throws Exception {
         // Mock List of FireStation objects
         List<FireStation> floodStations = new ArrayList<>();
-        // Ajoutez ici des objets FireStation à votre liste de simulation
 
         // Mock List of Person objects
         List<Person> residents = new ArrayList<>();
-        // Ajoutez ici des objets Person à votre liste de simulation
 
         // Mock Map of MedicalRecord objects
         Map<String, MedicalRecord> medicalRecords = new HashMap<>();
-        // Ajoutez ici des objets MedicalRecord simulés à votre map
 
         // Mock FireStationService
         when(fireStationService.getFloodStations(anyList())).thenReturn(floodStations);
@@ -274,8 +267,8 @@ public class FireStationControllerTest {
         MedicalRecordService medicalRecordService = mock(MedicalRecordService.class);
 
         // Creating a list of FireStation
-        List<model.FireStation> fireStations = new ArrayList<>();
-        fireStations.add(new model.FireStation("123 Main St", Integer.valueOf(1)));
+        List<FireStation> fireStations = new ArrayList<>();
+        fireStations.add(new FireStation("123 Main St", Integer.valueOf(1)));
 
         // Creating the controller with mocked services and the list of FireStation
         FireStationController fireStationController = new FireStationController(fireStationService, personService, medicalRecordService, fireStations);

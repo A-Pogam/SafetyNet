@@ -1,16 +1,15 @@
 package TestService;
 
-import model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

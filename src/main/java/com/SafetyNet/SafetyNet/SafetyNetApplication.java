@@ -1,24 +1,21 @@
 package com.SafetyNet.SafetyNet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import controller.FireStationController;
+import com.SafetyNet.SafetyNet.controller.FireStationController;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import model.FireStation;
-import model.MedicalRecord;
-import model.Person;
+import com.SafetyNet.SafetyNet.model.FireStation;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.util.FileCopyUtils;
-import service.FireStationService;
-import service.MedicalRecordService;
-import service.PersonService;
+import com.SafetyNet.SafetyNet.service.FireStationService;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import com.SafetyNet.SafetyNet.service.PersonService;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,10 +27,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
-@Component
 @SpringBootApplication
-
-@ComponentScan(basePackages = {"service", "model", "controller", "repository"})
+@ComponentScan(basePackages = {"com/SafetyNet/SafetyNet/service", "com/SafetyNet/SafetyNet/model", "com/SafetyNet/SafetyNet/controller", "com/SafetyNet/SafetyNet/repository"})
 public class SafetyNetApplication implements CommandLineRunner {
 	public static void main(String[] args) {
 		SpringApplication.run(SafetyNetApplication.class, args);
@@ -70,7 +65,7 @@ public class SafetyNetApplication implements CommandLineRunner {
 
 		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 
-		ClassPathResource resource = new ClassPathResource("/data/safety-net-data.json");
+		ClassPathResource resource = new ClassPathResource("data/safety-net-data.json");
 
 		String jsonData = new String(FileCopyUtils.copyToByteArray(resource.getInputStream()), StandardCharsets.UTF_8);
 
