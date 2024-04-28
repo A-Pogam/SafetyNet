@@ -1,81 +1,106 @@
 package com.SafetyNet.SafetyNet.service;
 
+
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import com.SafetyNet.SafetyNet.model.Person;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.SafetyNet.SafetyNet.repository.PersonRepository;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
-    private final PersonRepository personRepository;
-    private final List<Person> personList = new ArrayList<>();
+    private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
 
 
-    public PersonService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
+    private final List<Person> persons = new ArrayList<>();
+    private final List<MedicalRecord> medicalRecords = new ArrayList<>();
 
     public List<Person> getAllPersons() {
-        return personList;
+        logger.info("Retrieving all persons");
+        return new ArrayList<>(persons);
     }
 
-    private final Map<String, Person> personMap = new HashMap<>();
-
-    public void addPerson(Person person) {
-        Person existingPerson = personRepository.findByFirstNameAndLastName(person.getFirstname(), person.getLastname());
-        if (existingPerson == null) {
-            personList.add(person);
-            personMap.put(person.getFirstname() + person.getLastname(), person);
+    public Person addPerson(Person person) {
+        logger.info("Adding person: {}", person);
+        if (!personExists(person.getFirstname(), person.getLastname())) {
+            persons.add(person);
+            logger.info("Person added successfully");
+            return person;
         } else {
-            throw new IllegalArgumentException("Person already exists");
+            logger.warn("Person already exists: {}", person);
+            return null;
         }
     }
 
 
 
-
-    public Person updatePerson(Person updatedPerson) {
-        // Recherche de la personne à mettre à jour dans la liste
-        for (Person person : personList) {
-            if (person.getFirstname().equals(updatedPerson.getFirstname()) && person.getLastname().equals(updatedPerson.getLastname())) {
-                // Mettre à jour les informations de la personne
-                person.setAddress(updatedPerson.getAddress());
-                person.setCity(updatedPerson.getCity());
-                person.setZip(updatedPerson.getZip());
-                person.setPhone(updatedPerson.getPhone());
-                person.setEmail(updatedPerson.getEmail());
-                return person; // Retourne la personne mise à jour
-            }
+    public boolean updatePerson(String firstName, String lastName, Person updatedPerson) {
+        Person existingPerson = getPersonByName(firstName, lastName);
+        if (existingPerson != null) {
+            // Mettre à jour les informations de la personne
+            existingPerson.setAddress(updatedPerson.getAddress());
+            existingPerson.setCity(updatedPerson.getCity());
+            existingPerson.setZip(updatedPerson.getZip());
+            existingPerson.setPhone(updatedPerson.getPhone());
+            existingPerson.setEmail(updatedPerson.getEmail());
+            return true;
+        } else {
+            return false; // Personne non trouvée pour la mise à jour
         }
-        // Si la personne n'est pas trouvée dans la liste, lance une exception
-        throw new IllegalArgumentException("Person not found");
     }
 
+    public boolean deletePerson(String firstName, String lastName) {
+        logger.info("Deleting person with name: {}, {}", firstName, lastName);
+        List<Person> matchingPersons = persons.stream()
+                .filter(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName))
+                .collect(Collectors.toList());
 
-
-    public void deletePerson(String firstName, String lastName) {
-        personRepository.deleteByFirstNameAndLastName(firstName, lastName);
+        if (!matchingPersons.isEmpty()) {
+            persons.removeAll(matchingPersons);
+            logger.info("Person(s) deleted successfully");
+            return true;
+        } else {
+            logger.warn("No person found for deletion with name: {}, {}", firstName, lastName);
+            return false;
+        }
     }
 
     public boolean personExists(String firstName, String lastName) {
-        return personRepository.findByFirstNameAndLastName(firstName, lastName) != null;
+        return persons.stream()
+                .anyMatch(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName));
     }
-
 
 
     public Person getPersonByName(String firstName, String lastName) {
-        return personRepository.findByFirstNameAndLastName(firstName, lastName);
+        logger.info("Searching for person with name: {}, {}", firstName, lastName);
+        return persons.stream()
+                .filter(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName))
+                .findFirst()
+                .orElse(null);
     }
 
+
     public List<Person> getPersonsByAddress(String address) {
-        return personRepository.findByAddress(address);
+        logger.info("Retrieving persons by address: {}", address);
+        return persons.stream()
+                .filter(person -> person.getAddress().equals(address))
+                .collect(Collectors.toList());
     }
 
     public List<String> getEmailsByCity(String city) {
-        return personRepository.findEmailsByCity(city);
+        logger.info("Retrieving emails for persons in city: {}", city);
+        return persons.stream()
+                .filter(person -> person.getCity().equals(city))
+                .map(Person::getEmail)
+                .collect(Collectors.toList());
     }
+
+
+
 }

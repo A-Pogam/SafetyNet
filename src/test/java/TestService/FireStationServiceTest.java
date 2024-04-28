@@ -2,6 +2,7 @@ package TestService;
 
 import com.SafetyNet.SafetyNet.model.FireStation;
 import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.repository.FireStationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.SafetyNet.SafetyNet.service.FireStationService;
@@ -22,13 +23,15 @@ public class FireStationServiceTest {
     private MedicalRecordService medicalRecordService;
     private FireStationService fireStationService;
 
+    private FireStationRepository fireStationRepository;
+
     @BeforeEach
     void setUp() {
         fireStations = new ArrayList<>();
         personService = mock(PersonService.class);
         persons = new ArrayList<>();
         medicalRecordService = mock(MedicalRecordService.class);
-        fireStationService = new FireStationService(fireStations, personService, persons, medicalRecordService);
+        fireStationService = new FireStationService(fireStations, personService, persons, medicalRecordService, fireStationRepository);
     }
 
     @Test

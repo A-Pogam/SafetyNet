@@ -1,18 +1,22 @@
 package com.SafetyNet.SafetyNet.controller;
 
-import com.SafetyNet.SafetyNet.service.PersonService;
 import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.service.PersonService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/person")
 public class PersonController {
+
     private final PersonService personService;
 
+    @Autowired
     public PersonController(PersonService personService) {
         this.personService = personService;
     }
@@ -25,31 +29,36 @@ public class PersonController {
 
     @PostMapping
     public ResponseEntity<String> addPerson(@RequestBody Person person) {
-        if (!personService.personExists(person.getFirstname(), person.getLastname())) {
-            personService.addPerson(person);
+        Person addedPerson = personService.addPerson(person);
+        if (addedPerson != null) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Person added successfully");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person already exists");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add this person");
         }
     }
-
 
     @PutMapping("/{firstName}/{lastName}")
     public ResponseEntity<String> updatePerson(
             @PathVariable String firstName,
             @PathVariable String lastName,
             @RequestBody Person updatedPerson) {
-        updatedPerson.setFirstname(firstName);
-        updatedPerson.setLastname(lastName);
-        personService.updatePerson(updatedPerson);
-        return ResponseEntity.ok("Person updated successfully");
+        boolean updated = personService.updatePerson(firstName, lastName, updatedPerson);
+        if (updated) {
+            return ResponseEntity.ok("Person updated successfully");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{firstName}/{lastName}")
     public ResponseEntity<String> deletePerson(
             @PathVariable String firstName,
             @PathVariable String lastName) {
-        personService.deletePerson(firstName, lastName);
-        return ResponseEntity.ok("Person deleted successfully");
+        boolean deleted = personService.deletePerson(firstName, lastName);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

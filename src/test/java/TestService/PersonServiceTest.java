@@ -34,19 +34,23 @@ public class PersonServiceTest {
         // Ajouter la personne à la liste personList
         personService.addPerson(personToUpdate);
 
-        // Définir le comportement du mock pour la méthode findByFirstNameAndLastName de PersonRepository
-        when(personRepository.findByFirstNameAndLastName("John", "Doe")).thenReturn(personToUpdate);
+        // Créer une personne avec les informations mises à jour
+        Person updatedPersonInfo = new Person("John", "Doe", "456 Elm St", "Newtown", "54321", "555-555-5555", "john@example.com");
 
         // Appeler la méthode à tester
-        Person updatedPerson = personService.updatePerson(personToUpdate);
+        boolean updated = personService.updatePerson("John", "Doe", updatedPersonInfo);
 
-        // Vérifier que la méthode save n'a pas été appelée (car la personne est mise à jour en mémoire, pas dans la base de données)
-        verify(personRepository, never()).save(any());
+        // Vérifier que la personne a été mise à jour avec succès
+        assertTrue(updated);
 
-        // Vérifier que la personne retournée par la méthode est la même que celle passée en paramètre
-        assertEquals(personToUpdate, updatedPerson);
+        // Récupérer la personne mise à jour
+        Person updatedPerson = personService.getPersonByName("John", "Doe");
+
+        // Vérifier que les informations de la personne ont été correctement mises à jour
+        assertEquals("456 Elm St", updatedPerson.getAddress());
+        assertEquals("Newtown", updatedPerson.getCity());
+        assertEquals("54321", updatedPerson.getZip());
     }
-
 
 
 
@@ -58,13 +62,20 @@ public class PersonServiceTest {
         String firstName = "John";
         String lastName = "Doe";
 
-        // Définir le comportement du mock pour la méthode deleteByFirstNameAndLastName de PersonRepository
-        doNothing().when(personRepository).deleteByFirstNameAndLastName(firstName, lastName);
+        // Créer une personne à supprimer
+        Person personToDelete = new Person(firstName, lastName, "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
+
+        // Ajouter la personne à la liste persons
+        personService.addPerson(personToDelete);
 
         // Appeler la méthode à tester
-        personService.deletePerson(firstName, lastName);
+        boolean deleted = personService.deletePerson(firstName, lastName);
 
-        // Vérifier l'appel à la méthode deleteByFirstNameAndLastName
-        verify(personRepository, times(1)).deleteByFirstNameAndLastName(firstName, lastName);
+        // Vérifier que la méthode a renvoyé vrai
+        assertTrue(deleted);
+
+        // Vérifier que la personne a été supprimée de la liste persons
+        assertFalse(personService.personExists(firstName, lastName));
     }
+
 }

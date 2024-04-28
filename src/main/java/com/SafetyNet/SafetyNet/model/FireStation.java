@@ -11,7 +11,6 @@ public class FireStation {
         // Constructeur par défaut
     }
 
-    // Constructeur avec paramètres
     public FireStation(String address, int station) {
         this.address = address;
         this.station = station;

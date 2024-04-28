@@ -6,6 +6,7 @@ import com.SafetyNet.SafetyNet.model.FireStation;
 
 import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.repository.FireStationRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,14 @@ public class FireStationService {
     private final List<Person> persons;
     private final MedicalRecordService medicalRecordService;
 
+    private final FireStationRepository fireStationRepository;
 
-    public FireStationService(List<FireStation> fireStations, PersonService personService, List<Person> persons, MedicalRecordService medicalRecordService) {
+    public FireStationService(List<FireStation> fireStations, PersonService personService, List<Person> persons, MedicalRecordService medicalRecordService, FireStationRepository fireStationRepository)  {
         this.fireStations = fireStations;
         this.personService = personService;
-        this.persons = persons;
+        this.persons = persons != null ? persons : new ArrayList<>();
         this.medicalRecordService = medicalRecordService;
+        this.fireStationRepository = fireStationRepository;
     }
 
 
@@ -82,24 +85,29 @@ public class FireStationService {
 
     public FireStationCoverage getCoverageByStationNumber(int stationNumber) {
         logger.info("Fetching coverage for fire station number: {}", stationNumber);
-        List<CoveredPerson> coveredPeople = new ArrayList<>(); // Converti en variable locale
-        int adultsCount = 0; // Converti en variable locale
-        int childrenCount = 0; // Converti en variable locale
+        List<CoveredPerson> coveredPeople = new ArrayList<>();
+        int adultsCount = 0;
+        int childrenCount = 0;
 
         for (FireStation fireStation : fireStations) {
             if (fireStation.getStation() == stationNumber) {
-                List<Person> persons = personService.getPersonsByAddress(fireStation.getAddress());
-                for (Person person : persons) {
-                    MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
-                    if (medicalRecord != null) {
-                        int age = calculateAge(medicalRecord.getBirthdate());
-                        coveredPeople.add(new CoveredPerson(person, age));
-                        if (age > 18) {
-                            adultsCount++;
-                        } else {
-                            childrenCount++;
+                // Vérifiez si persons est null avant d'itérer
+                if (persons != null) {
+                    List<Person> persons = personService.getPersonsByAddress(fireStation.getAddress());
+                    for (Person person : persons) {
+                        MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
+                        if (medicalRecord != null && medicalRecord.getBirthdate() != null && !medicalRecord.getBirthdate().isEmpty()) {
+                            int age = calculateAge(medicalRecord.getBirthdate());
+                            coveredPeople.add(new CoveredPerson(person, age));
+                            if (age > 18) {
+                                adultsCount++;
+                            } else {
+                                childrenCount++;
+                            }
                         }
                     }
+                } else {
+                    logger.warn("Persons list is null");
                 }
             }
         }
@@ -112,6 +120,7 @@ public class FireStationService {
         logger.info("Coverage fetched successfully for fire station number: {}", stationNumber);
         return coverage;
     }
+
 
 
     public int calculateAge(String birthdate) {

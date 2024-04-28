@@ -14,4 +14,6 @@ public interface PersonRepository {
     List<String> findEmailsByCity(String city);
     void save(Person person);
     void deleteByFirstNameAndLastName(String firstName, String lastName);
+
+
 }

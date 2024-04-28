@@ -66,11 +66,13 @@ public class PersonControllerTest {
 
     @Test
     void testAddPerson_Failure() throws Exception {
+        // Given
         Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
 
         // Configurer le comportement du mock pour retourner vrai, indiquant que la personne existe déjà
         when(personService.personExists(person.getFirstname(), person.getLastname())).thenReturn(true);
 
+        // When & Then
         mockMvc.perform(post("/person")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(person)))
@@ -80,16 +82,13 @@ public class PersonControllerTest {
                 .andExpect(content().string("Person already exists"));
     }
 
-
-
-
-
-
     @Test
     void testUpdatePerson() throws Exception {
         // Given
         Person updatedPerson = new Person("John", "Doe", "123 Main St", "Springfield", "12345", "123-456-7890", "john.doe@example.com");
-        when(personService.updatePerson(any(Person.class))).thenReturn(updatedPerson);
+
+        // Configurer le comportement du mock pour la méthode updatePerson de PersonService
+        when(personService.updatePerson("John", "Doe", updatedPerson)).thenReturn(true);
 
         // When & Then
         mockMvc.perform(put("/person/John/Doe")
@@ -107,7 +106,6 @@ public class PersonControllerTest {
 
         // When & Then
         mockMvc.perform(delete("/person/{firstName}/{lastName}", firstName, lastName))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Person deleted successfully"));
+                .andExpect(status().isNoContent());
     }
 }
