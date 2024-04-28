@@ -11,7 +11,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.util.FileCopyUtils;
 import com.SafetyNet.SafetyNet.service.FireStationService;
 import com.SafetyNet.SafetyNet.service.MedicalRecordService;

@@ -12,9 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.hamcrest.Matchers.*;
+
 
 
 import org.mockito.MockitoAnnotations;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -220,8 +218,8 @@ public class FireStationControllerTest {
 
     @Test
     public void testGetFloodStations() throws Exception {
-        // Mock List of FireStation objects
-        List<FireStation> floodStations = new ArrayList<>();
+        // Mock List of Map<String, Object> objects representing flood stations details
+        List<Map<String, Object>> floodStationsDetails = new ArrayList<>();
 
         // Mock List of Person objects
         List<Person> residents = new ArrayList<>();
@@ -230,7 +228,7 @@ public class FireStationControllerTest {
         Map<String, MedicalRecord> medicalRecords = new HashMap<>();
 
         // Mock FireStationService
-        when(fireStationService.getFloodStations(anyList())).thenReturn(floodStations);
+        when(fireStationService.getFloodStations(anyList())).thenReturn(floodStationsDetails);
 
         // Mock PersonService
         when(personService.getPersonsByAddress(anyString())).thenReturn(residents);
@@ -245,14 +243,16 @@ public class FireStationControllerTest {
             }
         });
 
-        // Effectuer une requête HTTP GET vers l'URL /flood/stations avec les paramètres nécessaires
+        // Perform an HTTP GET request to the /flood/stations URL with the required parameters
         mockMvc.perform(MockMvcRequestBuilders.get("/flood/stations")
                         .param("stations", "1", "2", "3"))
+                // Expects the response status to be OK (200)
                 .andExpect(status().isOk());
     }
 
+
     @Test
-    public void testGetResidentsAndFireStation_Success() {
+    public void testGetResidentsAndFireStation_Success() throws Exception {
         // Given
         String address = "123 Main St";
 
@@ -262,27 +262,29 @@ public class FireStationControllerTest {
         residents.add(new Person("Jane", "Doe", "12 rue de la courgette", "Légume", "12", "1234", "jane@exemple.com"));
 
         // Mocking the behavior of fireStationService
-        FireStationService fireStationService = mock(FireStationService.class);
-        PersonService personService = mock(PersonService.class);
-        MedicalRecordService medicalRecordService = mock(MedicalRecordService.class);
-
-        // Creating a list of FireStation
         List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(new FireStation("123 Main St", Integer.valueOf(1)));
+        fireStations.add(new FireStation("123 Main St", 1));
 
-        // Creating the controller with mocked services and the list of FireStation
-        FireStationController fireStationController = new FireStationController(fireStationService, personService, medicalRecordService, fireStations);
+        // Mock FireStationService
+        when(fireStationService.getFireStationNumberByAddress(address)).thenReturn(1);
 
-        // Mocking the expected behavior when calling methods on mocked services
-        when(fireStationService.getFireStationNumberByAddress(address)).thenReturn(1); // Assuming the fire station number for this address is 1
+        // Mock PersonService
         when(personService.getPersonsByAddress(address)).thenReturn(residents);
 
-        // Calling the method to be tested
-        ResponseEntity<?> responseEntity = fireStationController.getResidentsAndFireStation(address);
+        // Perform an HTTP GET request to the /fire URL with the required parameter
+        mockMvc.perform(MockMvcRequestBuilders.get("/fire")
+                        .param("address", address))
+                // Expects the response status to be OK (200)
+                .andExpect(status().isOk())
+                // Expects the response content type to be JSON
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                // Expects the response body to contain specific data
+                .andExpect(jsonPath("$.address").value(address))
+                .andExpect(jsonPath("$.residents", hasSize(2)))
+                .andExpect(jsonPath("$.residents[0].firstName").value("John"))
+                .andExpect(jsonPath("$.residents[1].firstName").value("Jane"));
+    }
 
-        // Assertions on the response
-        assertEquals(200, responseEntity.getStatusCodeValue()); // Assuming the expected status code is 200
-    }
-    }
+}
 
 
