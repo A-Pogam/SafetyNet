@@ -26,12 +26,17 @@ public class PersonService {
     private final Map<String, Person> personMap = new HashMap<>();
 
     public void addPerson(Person person) {
-        if (!personExists(person.getFirstname(), person.getLastname())) {
+        Person existingPerson = personRepository.findByFirstNameAndLastName(person.getFirstname(), person.getLastname());
+        if (existingPerson == null) {
             personList.add(person);
+            personMap.put(person.getFirstname() + person.getLastname(), person);
         } else {
             throw new IllegalArgumentException("Person already exists");
         }
     }
+
+
+
 
     public Person updatePerson(Person updatedPerson) {
         // Recherche de la personne à mettre à jour dans la liste
@@ -57,9 +62,10 @@ public class PersonService {
     }
 
     public boolean personExists(String firstName, String lastName) {
-        return personList.stream()
-                .anyMatch(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName));
+        return personRepository.findByFirstNameAndLastName(firstName, lastName) != null;
     }
+
+
 
     public Person getPersonByName(String firstName, String lastName) {
         return personRepository.findByFirstNameAndLastName(firstName, lastName);

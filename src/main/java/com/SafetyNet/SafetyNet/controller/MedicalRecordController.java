@@ -39,8 +39,13 @@ public class MedicalRecordController {
     public ResponseEntity<MedicalRecord> addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
         logger.info("Received request to add medical record for {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
         MedicalRecord addedRecord = medicalRecordService.addMedicalRecord(medicalRecord);
-        logger.info("Added medical record for {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(addedRecord);
+        if (addedRecord != null) {
+            logger.info("Added medical record for {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
+            return ResponseEntity.status(HttpStatus.CREATED).body(addedRecord);
+        } else {
+            logger.error("Failed to add medical record for {} {}. Record already exists.", medicalRecord.getFirstName(), medicalRecord.getLastName());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{firstName}/{lastName}")
@@ -51,7 +56,6 @@ public class MedicalRecordController {
     ) {
         logger.info("Received request to update medical record for {} {}.", firstName, lastName);
         MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(firstName, lastName, updatedMedicalRecord);
-
         if (updatedRecord != null) {
             logger.info("Updated medical record for {} {}.", firstName, lastName);
             return ResponseEntity.ok(updatedRecord);
@@ -76,5 +80,4 @@ public class MedicalRecordController {
             return ResponseEntity.notFound().build();
         }
     }
-
 }

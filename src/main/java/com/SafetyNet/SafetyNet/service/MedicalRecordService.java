@@ -15,10 +15,9 @@ import java.util.List;
 public class MedicalRecordService {
     private static final Logger logger = LoggerFactory.getLogger(MedicalRecordService.class);
 
-
     private final List<MedicalRecord> medicalRecords = new ArrayList<>();
 
-    public List<MedicalRecord> getMedicalRecords() {
+    public List<MedicalRecord> getAllMedicalRecords() {
         logger.info("Retrieving all medical records");
         return new ArrayList<>(medicalRecords);
     }
@@ -31,18 +30,18 @@ public class MedicalRecordService {
     }
 
     public MedicalRecord updateMedicalRecord(String firstName, String lastName, MedicalRecord updatedMedicalRecord) {
-        logger.info("Updating medical record for person with name: {}, {}", firstName, lastName);
-        for (MedicalRecord existingRecord : medicalRecords) {
-            if (existingRecord.getFirstName().equals(firstName) && existingRecord.getLastName().equals(lastName)) {
-                existingRecord.setBirthdate(updatedMedicalRecord.getBirthdate());
-                existingRecord.setMedications(updatedMedicalRecord.getMedications());
-                existingRecord.setAllergies(updatedMedicalRecord.getAllergies());
-                logger.info("Medical record updated successfully");
-                return existingRecord;
-            }
+        MedicalRecord existingRecord = getMedicalRecordByName(firstName, lastName);
+        if (existingRecord != null) {
+            logger.info("Updating medical record for person with name: {}, {}", firstName, lastName);
+            existingRecord.setBirthdate(updatedMedicalRecord.getBirthdate());
+            existingRecord.setMedications(updatedMedicalRecord.getMedications());
+            existingRecord.setAllergies(updatedMedicalRecord.getAllergies());
+            logger.info("Medical record updated successfully");
+            return existingRecord;
+        } else {
+            logger.warn("No medical record found for update for person with name: {}, {}", firstName, lastName);
+            return null;
         }
-        logger.warn("No medical record found for update for person with name: {}, {}", firstName, lastName);
-        return null;
     }
 
     public boolean deleteMedicalRecord(String firstName, String lastName) {
@@ -59,12 +58,6 @@ public class MedicalRecordService {
         logger.warn("No medical record found for deletion for person with name: {}, {}", firstName, lastName);
         return false;
     }
-
-    public List<MedicalRecord> getAllMedicalRecords() {
-        logger.info("Retrieving all medical records");
-        return medicalRecords;
-    }
-
 
     public MedicalRecord getMedicalRecordByName(String firstName, String lastName) {
         logger.info("Retrieving medical record for person with name: {}, {}", firstName, lastName);

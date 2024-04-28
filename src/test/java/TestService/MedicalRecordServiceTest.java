@@ -1,20 +1,19 @@
 package TestService;
 
 import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 public class MedicalRecordServiceTest {
 
@@ -26,26 +25,23 @@ public class MedicalRecordServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         // Initialisation des données de test
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-        medicalRecords.add(new MedicalRecord("John", "Doe", "01/01/1980", new ArrayList<>(), new ArrayList<>()));
-        medicalRecords.add(new MedicalRecord("Jane", "Doe", "01/02/1990", new ArrayList<>(), new ArrayList<>()));
+        List<MedicalRecord> medicalRecordsList = new ArrayList<>();
+        medicalRecordsList.add(new MedicalRecord("John", "Doe", "01/01/1980", new ArrayList<>(), new ArrayList<>()));
+        medicalRecordsList.add(new MedicalRecord("Jane", "Doe", "01/02/1990", new ArrayList<>(), new ArrayList<>()));
 
-        medicalRecordService = mock(MedicalRecordService.class);
+        medicalRecordService = Mockito.spy(new MedicalRecordService());
 
-        // Mock pour medicalRecordService.getMedicalRecords()
-        when(medicalRecordService.getMedicalRecords()).thenReturn(medicalRecords);
+        // Mock pour medicalRecordService.getAllMedicalRecords()
+        Mockito.doReturn(medicalRecordsList).when(medicalRecordService).getAllMedicalRecords();
     }
 
 
 
-
     @Test
-    void testGetMedicalRecords() {
+    void testGetAllMedicalRecords() {
         // Appel de la méthode à tester
-        List<MedicalRecord> result = medicalRecordService.getMedicalRecords();
+        List<MedicalRecord> result = medicalRecordService.getAllMedicalRecords();
 
         // Vérification du résultat
         assertEquals(2, result.size());
