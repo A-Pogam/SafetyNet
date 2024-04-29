@@ -14,6 +14,7 @@ import com.SafetyNet.SafetyNet.service.PersonService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,36 +36,32 @@ public class ChildAlertController {
     @GetMapping("/childAlert")
     public ResponseEntity<List<ChildInfo>> getChildAlert(@RequestParam String address) {
         logger.info("Received request to get child alert for address: {}", address);
+
+        // Récupérer la liste des résidents de l'adresse spécifiée
         List<Person> residents = personService.getPersonsByAddress(address);
-        List<ChildInfo> children = residents.stream()
-                .map(this::mapPersonToChildInfo)
-                .filter(childInfo -> childInfo != null && childInfo.getAge() <= 18)
-                .collect(Collectors.toList());
+
+        // Créer une liste pour stocker les informations sur les enfants
+        List<ChildInfo> children = new ArrayList<>();
+
+        // Parcourir la liste des résidents pour trouver les enfants
+        for (Person resident : residents) {
+            ChildInfo childInfo = personService.mapPersonToChildInfo(resident, fireStationService, medicalRecordService);
+            if (childInfo != null && childInfo.getAge() <= 18) {
+                // Récupérer les autres membres du foyer (enfants exclus)
+                List<Person> householdMembers = residents.stream()
+                        .filter(person -> !person.equals(resident))
+                        .collect(Collectors.toList());
+                // Ajouter les autres membres du foyer à l'objet ChildInfo
+                childInfo.setHouseholdMembers(householdMembers);
+                // Ajouter l'enfant à la liste des enfants
+                children.add(childInfo);
+            }
+        }
+
         logger.info("Found {} children in the household for address: {}", children.size(), address);
         return ResponseEntity.ok(children);
     }
 
-    public ChildInfo mapPersonToChildInfo(Person person) {
-        // Get medical record for the person
-        MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
-        if (medicalRecord == null) {
-            return null;
-        }
-
-        // Calculate age based on birthdate using FireStationService
-        int age = fireStationService.calculateAge(medicalRecord.getBirthdate());
-        if (age == -1) {
-            return null;
-        }
-
-        // Get other members of the household
-        List<Person> householdMembers = personService.getPersonsByAddress(person.getAddress())
-                .stream()
-                .filter(p -> !p.getFirstname().equals(person.getFirstname()) && !p.getLastname().equals(person.getLastname()))
-                .collect(Collectors.toList());
-
-        return new ChildInfo(person.getFirstname(), person.getLastname(), age, householdMembers);
-    }
 }
 
 

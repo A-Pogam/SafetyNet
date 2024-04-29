@@ -1,6 +1,7 @@
 package com.SafetyNet.SafetyNet.service;
 
 
+import com.SafetyNet.SafetyNet.dto.ChildInfo;
 import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import com.SafetyNet.SafetyNet.model.Person;
 import org.springframework.http.ResponseEntity;
@@ -101,6 +102,31 @@ public class PersonService {
                 .collect(Collectors.toList());
     }
 
+    public ChildInfo mapPersonToChildInfo(Person person, FireStationService fireStationService, MedicalRecordService medicalRecordService) {
+        // Get medical record for the person
+        MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
+        if (medicalRecord == null) {
+            return null;
+        }
+
+        // Calculate age based on birthdate using FireStationService
+        int age = fireStationService.calculateAge(medicalRecord.getBirthdate());
+        if (age == -1) {
+            return null;
+        }
+
+        // Get other members of the household
+        List<Person> householdMembers = getHouseholdMembers(person);
+
+        return new ChildInfo(person.getFirstname(), person.getLastname(), age, householdMembers);
+    }
+
+    private List<Person> getHouseholdMembers(Person person) {
+        return getPersonsByAddress(person.getAddress())
+                .stream()
+                .filter(p -> !p.getFirstname().equals(person.getFirstname()) && !p.getLastname().equals(person.getLastname()))
+                .collect(Collectors.toList());
+    }
 
 
 }
