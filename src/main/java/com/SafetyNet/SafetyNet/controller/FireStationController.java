@@ -56,6 +56,7 @@ public class FireStationController {
         return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
     }
 
+
     @GetMapping("/flood/stations")
     public ResponseEntity<?> getFloodStations(@RequestParam("stations") List<Integer> stationNumbers) {
         List<FireStation> floodStations = fireStationService.getFloodStationsAsFireStations(stationNumbers);

@@ -134,9 +134,27 @@ public class FireStationService {
         List<Person> residents = personService.getPersonsByAddress(address);
 
         // Construire la réponse avec les informations des résidents et le numéro de la caserne
+        List<Map<String, Object>> residentsInfo = new ArrayList<>();
+        for (Person resident : residents) {
+            Map<String, Object> residentInfo = new HashMap<>();
+            residentInfo.put("firstName", resident.getFirstname());
+            residentInfo.put("lastName", resident.getLastname());
+
+            // Récupérer l'âge à partir du MedicalRecord
+            MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(resident.getFirstname(), resident.getLastname());
+            if (medicalRecord != null) {
+                residentInfo.put("age", calculateAge(medicalRecord.getBirthdate()));
+                residentInfo.put("medications", medicalRecord.getMedications());
+                residentInfo.put("allergies", medicalRecord.getAllergies());
+            }
+
+            residentInfo.put("phone", resident.getPhone());
+            residentsInfo.add(residentInfo);
+        }
+
         Map<String, Object> response = new HashMap<>();
         response.put("fireStationNumber", fireStationNumber);
-        response.put("residents", residents);
+        response.put("residents", residentsInfo);
 
         logger.info("Residents and fire station fetched successfully for address: {}", address);
         return response;
