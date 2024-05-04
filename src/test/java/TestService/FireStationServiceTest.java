@@ -2,7 +2,8 @@ package TestService;
 
 import com.SafetyNet.SafetyNet.model.FireStation;
 import com.SafetyNet.SafetyNet.model.Person;
-import com.SafetyNet.SafetyNet.repository.FireStationRepository;
+import com.SafetyNet.SafetyNet.repository.contracts.IFireStationRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import com.SafetyNet.SafetyNet.service.FireStationService;
@@ -23,7 +24,7 @@ public class FireStationServiceTest {
     private MedicalRecordService medicalRecordService;
     private FireStationService fireStationService;
 
-    private FireStationRepository fireStationRepository;
+    private IFireStationRepository fireStationRepository;
 
     @BeforeEach
     void setUp() {
@@ -79,4 +80,3 @@ public class FireStationServiceTest {
         assertNull(fireStationService.getFireStationNumberByAddress(address));
     }
 }
-

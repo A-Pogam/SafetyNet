@@ -1,3 +1,4 @@
+
 package com.SafetyNet.SafetyNet.dto;
 
 import com.SafetyNet.SafetyNet.model.Person;
@@ -49,4 +50,3 @@ public class ChildInfo {
         this.householdMembers = householdMembers;
     }
 }
-

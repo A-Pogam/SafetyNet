@@ -1,132 +1,158 @@
 package com.SafetyNet.SafetyNet.service;
 
 
-import com.SafetyNet.SafetyNet.dto.ChildInfo;
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-import com.SafetyNet.SafetyNet.model.Person;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.SafetyNet.SafetyNet.dto.ChildInfo;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.repository.contracts.IMedicalRecordRepository;
+import com.SafetyNet.SafetyNet.repository.contracts.IPersonRepository;
+import com.SafetyNet.SafetyNet.service.contracts.IMedicalRecordService;
+import com.SafetyNet.SafetyNet.service.contracts.IPersonService;
 
 @Service
-public class PersonService {
+public class PersonService implements IPersonService {
+
     private static final Logger logger = LoggerFactory.getLogger(PersonService.class);
 
+    @Autowired
+    private IMedicalRecordService iMedicalRecordService;
 
-    private final List<Person> persons = new ArrayList<>();
-    private final List<MedicalRecord> medicalRecords = new ArrayList<>();
+    @Autowired
+    private IPersonRepository iPersonRepository;
+    @Autowired
+    private IMedicalRecordRepository iMedicalRecordRepository;
 
+    @Override
     public List<Person> getAllPersons() {
-        logger.info("Retrieving all persons");
-        return new ArrayList<>(persons);
+        return iPersonRepository.findAll();
     }
 
+    @Override
     public Person addPerson(Person person) {
-        logger.info("Adding person: {}", person);
-        if (!personExists(person.getFirstname(), person.getLastname())) {
-            persons.add(person);
-            logger.info("Person added successfully");
-            return person;
+        for(Person existingPerson : iPersonRepository.findAll()) {
+            if(person.getFirstname().equals(existingPerson.getFirstname()) && person.getLastname().equals(existingPerson.getLastname())) {
+                logger.warn("Person already exists: {} {}", person.getFirstname(), person.getLastname());
+                return null;
+            }
+        }
+
+        return iPersonRepository.save(person);
+    }
+
+    @Override
+    public Person updatePerson(String firstName, String lastName, Person personUpdate) {
+        Person existingPerson = iPersonRepository.findByFirstNameAndLastName(firstName, lastName);
+
+        if (existingPerson != null) {
+            return iPersonRepository.update(existingPerson, personUpdate);
         } else {
-            logger.warn("Person already exists: {}", person);
+            logger.warn("No person found for update for person with name: {} {}", firstName, lastName);
             return null;
         }
     }
 
-
-
-    public boolean updatePerson(String firstName, String lastName, Person updatedPerson) {
-        Person existingPerson = getPersonByName(firstName, lastName);
-        if (existingPerson != null) {
-            // Mettre à jour les informations de la personne
-            existingPerson.setAddress(updatedPerson.getAddress());
-            existingPerson.setCity(updatedPerson.getCity());
-            existingPerson.setZip(updatedPerson.getZip());
-            existingPerson.setPhone(updatedPerson.getPhone());
-            existingPerson.setEmail(updatedPerson.getEmail());
-            return true;
-        } else {
-            return false; // Personne non trouvée pour la mise à jour
-        }
-    }
-
+    @Override
     public boolean deletePerson(String firstName, String lastName) {
-        logger.info("Deleting person with name: {}, {}", firstName, lastName);
-        List<Person> matchingPersons = persons.stream()
-                .filter(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName))
-                .collect(Collectors.toList());
+        Person matchingPerson = iPersonRepository.findByFirstNameAndLastName(firstName, lastName);
 
-        if (!matchingPersons.isEmpty()) {
-            persons.removeAll(matchingPersons);
-            logger.info("Person(s) deleted successfully");
+        if (matchingPerson != null) {
+            iPersonRepository.deleteByFirstNameAndLastName(firstName, lastName);
             return true;
         } else {
-            logger.warn("No person found for deletion with name: {}, {}", firstName, lastName);
+            logger.warn("No person found for deletion with name: {} {}", firstName, lastName);
             return false;
         }
     }
 
-    public boolean personExists(String firstName, String lastName) {
-        return persons.stream()
-                .anyMatch(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName));
+    @Override
+    public List<ChildInfo> getChildAlert(String address) {
+        logger.info("Received request to get child alert for address: {}", address);
+
+        // Créer une liste pour stocker les informations sur les enfants
+        List<ChildInfo> childrenInfos = new ArrayList<>();
+        // Récupérer la liste des résidents de l'adresse spécifiée
+        List<Person> residents = iPersonRepository.findByAddress(address);
+
+        // Parcourir la liste des résidents pour trouver les enfants
+        for (Person resident : residents) {
+            // Get medical record for the resident
+            MedicalRecord medicalRecord = iMedicalRecordRepository.findByFirstNameAndLastName(resident.getFirstname(), resident.getLastname());
+            // Calculate age based on birthdate using FireStationService
+            int age = iMedicalRecordService.calculateAge(medicalRecord.getBirthdate());
+            // Get other members of the household
+            List<Person> householdMembers = iPersonRepository.findHouseholdMembersByPerson(resident);
+
+            ChildInfo childInfo = new ChildInfo(resident.getFirstname(), resident.getLastname(), age, householdMembers);
+
+            if (childInfo != null && childInfo.getAge() <= 18) {
+                // Récupérer les autres membres du foyer (enfants exclus)
+                List<Person> parents = residents.stream().filter(person -> !person.equals(resident))
+                        .collect(Collectors.toList());
+                // Ajouter les autres membres du foyer à l'objet ChildInfo
+                childInfo.setHouseholdMembers(parents);
+
+                // Ajouter l'enfant à la liste des enfants
+                childrenInfos.add(childInfo);
+            }
+        }
+
+        logger.info("Found {} children in the household for address: {}", childrenInfos.size(), address);
+        return childrenInfos;
     }
 
-
-    public Person getPersonByName(String firstName, String lastName) {
-        logger.info("Searching for person with name: {}, {}", firstName, lastName);
-        return persons.stream()
-                .filter(person -> person.getFirstname().equals(firstName) && person.getLastname().equals(lastName))
-                .findFirst()
-                .orElse(null);
-    }
-
-
-    public List<Person> getPersonsByAddress(String address) {
-        logger.info("Retrieving persons by address: {}", address);
-        return persons.stream()
-                .filter(person -> person.getAddress().equals(address))
-                .collect(Collectors.toList());
-    }
-
+    @Override
     public List<String> getEmailsByCity(String city) {
-        logger.info("Retrieving emails for persons in city: {}", city);
-        return persons.stream()
-                .filter(person -> person.getCity().equals(city))
-                .map(Person::getEmail)
-                .collect(Collectors.toList());
+        List<String> emailsByCity = new ArrayList<String>();
+
+        for(String email : iPersonRepository.findEmailsByCity(city)) {
+            if(!emailsByCity.contains(email)) {
+                emailsByCity.add(email);
+            }
+        }
+
+        return emailsByCity;
     }
 
-    public ChildInfo mapPersonToChildInfo(Person person, FireStationService fireStationService, MedicalRecordService medicalRecordService) {
-        // Get medical record for the person
-        MedicalRecord medicalRecord = medicalRecordService.getMedicalRecordByName(person.getFirstname(), person.getLastname());
-        if (medicalRecord == null) {
+    @Override
+    public Map<String, Object> getPersonInfo(String firstName, String lastName) {
+        logger.info("Received request to get person info: {} {}", firstName, lastName);
+
+        Person person = iPersonRepository.findByFirstNameAndLastName(firstName, lastName);
+
+        if (person == null) {
+            logger.error("Person not found: {} {}", firstName, lastName);
             return null;
         }
 
-        // Calculate age based on birthdate using FireStationService
-        int age = fireStationService.calculateAge(medicalRecord.getBirthdate());
-        if (age == -1) {
-            return null;
+        // Créer une carte pour stocker les détails de cette personne
+        Map<String, Object> personDetails = new HashMap<>();
+        personDetails.put("name", person.getFirstname() + " " + person.getLastname());
+        personDetails.put("address", person.getAddress());
+        personDetails.put("email", person.getEmail());
+        personDetails.put("phone", person.getPhone());
+
+        // Récupérer le dossier médical de la personne
+        MedicalRecord medicalRecord = iMedicalRecordRepository.findByFirstNameAndLastName(firstName, lastName);
+        if (medicalRecord != null) {
+            // Calculer l'âge à partir de la date de naissance
+            int age = iMedicalRecordService.calculateAge(medicalRecord.getBirthdate());
+
+            personDetails.put("age", age);
+            personDetails.put("medications", medicalRecord.getMedications());
+            personDetails.put("allergies", medicalRecord.getAllergies());
         }
 
-        // Get other members of the household
-        List<Person> householdMembers = getHouseholdMembers(person);
-
-        return new ChildInfo(person.getFirstname(), person.getLastname(), age, householdMembers);
+        return personDetails;
     }
-
-    private List<Person> getHouseholdMembers(Person person) {
-        return getPersonsByAddress(person.getAddress())
-                .stream()
-                .filter(p -> !p.getFirstname().equals(person.getFirstname()) && !p.getLastname().equals(person.getLastname()))
-                .collect(Collectors.toList());
-    }
-
-
 }

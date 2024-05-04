@@ -1,108 +1,98 @@
 package TestController;
 
-import com.SafetyNet.SafetyNet.controller.ChildAlertController;
-import com.SafetyNet.SafetyNet.dto.ChildInfo;
+import com.SafetyNet.SafetyNet.SafetyNetApplication;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.SafetyNet.SafetyNet.controller.PersonInfoController;
 import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import com.SafetyNet.SafetyNet.model.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
 import com.SafetyNet.SafetyNet.service.FireStationService;
 import com.SafetyNet.SafetyNet.service.MedicalRecordService;
 import com.SafetyNet.SafetyNet.service.PersonService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-public class ChildAlertControllerTest {
+@SpringBootTest(classes = SafetyNetApplication.class)
+@AutoConfigureMockMvc
+
+
+public class PersonInfoControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @Mock
     private PersonService personService;
 
     @Mock
-    private FireStationService fireStationService;
-
-    @Mock
     private MedicalRecordService medicalRecordService;
 
-    @InjectMocks
-    private ChildAlertController childAlertController;
+    @Mock
+    private FireStationService fireStationService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    private PersonInfoController personInfoController;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    void setUp() {
+        personInfoController = new PersonInfoController(personService, medicalRecordService, fireStationService);
     }
 
     @Test
-    public void testMapPersonToChildInfo_ValidPerson() {
-        // Créer un objet Person simulé
-        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
+    public void testGetPersonInfo() {
+        // Créer un objet Person
+        Person person = new Person("John", "Doe", "123 Main St", "Wonderland", "42", "1234567890", "john@example.com");
 
-        // Créer un objet MedicalRecord simulé
+        // Créer un objet MedicalRecord
         MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setBirthdate("01/01/2005"); // Age = 17 ans (en 2022)
+        medicalRecord.setBirthdate("01/01/1990");
+        List<String> medications = new ArrayList<>();
+        medications.add("Medicine1");
+        medications.add("Medicine2");
+        medicalRecord.setMedications(medications);
+
+        List<String> allergies = new ArrayList<>();
+        allergies.add("Pollen");
+        medicalRecord.setAllergies(allergies);
 
         // Définir le comportement des services mockés
+        when(personService.getPersonByName("John", "Doe")).thenReturn(person);
         when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(medicalRecord);
-        when(fireStationService.calculateAge("01/01/2005")).thenReturn(17);
+        when(fireStationService.calculateAge("01/01/1990")).thenReturn(32); // Mocking the age calculation
 
         // Appeler la méthode à tester
-        ChildInfo childInfo = childAlertController.
-                mapPersonToChildInfo(person);
+        ResponseEntity<?> responseEntity = personInfoController.getPersonInfo("John", "Doe");
 
-        // Vérifier si les détails de l'enfant sont corrects
-        assertEquals("John", childInfo.getFirstName());
-        assertEquals("Doe", childInfo.getLastName());
-        assertEquals(17, childInfo.getAge());
-    }
+        // Vérifier si la réponse est OK
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
-    @Test
-    public void testMapPersonToChildInfo_NullMedicalRecord() {
-        // Créer un objet Person simulé
-        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
+        // Vérifier les détails de la personne dans la réponse
+        Map<String, Object> expectedDetails = new HashMap<>();
+        expectedDetails.put("name", "John Doe");
+        expectedDetails.put("address", "123 Main St");
+        expectedDetails.put("email", "john@example.com");
+        expectedDetails.put("phone", "1234567890");
+        expectedDetails.put("age", 32);
+        expectedDetails.put("medications", "Medicine1, Medicine2");
+        expectedDetails.put("allergies", "Pollen");
 
-        // Définir le comportement des services mockés
-        when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(null);
-
-        // Appeler la méthode à tester
-        ChildInfo childInfo = childAlertController.mapPersonToChildInfo(person);
-
-        // Vérifier si la méthode renvoie null
-        assertEquals(null, childInfo);
-    }
-
-    @Test
-    public void testGetChildAlert() {
-        // Adresse simulée
-        String address = "123 Main St";
-
-        // Créer une liste simulée de personnes (avec au moins un enfant)
-        List<Person> residents = new ArrayList<>();
-        residents.add(new Person("John", "Doe", address, "Anytown", "12345", "555-555-5555", "john@example.com"));
-        residents.add(new Person("Jane", "Doe", address, "Anytown", "12345", "555-555-5555", "jane@example.com"));
-
-        // Créer un objet MedicalRecord simulé
-        MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setBirthdate("01/01/2005"); // Age = 17 ans (en 2022)
-
-        // Définir le comportement des services mockés
-        when(personService.getPersonsByAddress(address)).thenReturn(residents);
-        when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(medicalRecord);
-        when(fireStationService.calculateAge("01/01/2005")).thenReturn(17);
-
-        // Appeler la méthode à tester
-        List<ChildInfo> childAlert = childAlertController.getChildAlert(address).getBody();
-
-        // Vérifier si la liste des enfants contient les informations attendues
-        assertEquals(1, childAlert.size());
-        assertEquals("John", childAlert.get(0).getFirstName());
-        assertEquals("Doe", childAlert.get(0).getLastName());
-        assertEquals(17, childAlert.get(0).getAge());
+        assertEquals(expectedDetails, responseEntity.getBody());
     }
 }
-

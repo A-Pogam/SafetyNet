@@ -1,12 +1,14 @@
 package TestService;
 
 import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.repository.contracts.IPersonRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import com.SafetyNet.SafetyNet.repository.PersonRepository;
+
 import com.SafetyNet.SafetyNet.service.PersonService;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -16,7 +18,7 @@ import static org.mockito.Mockito.*;
 public class PersonServiceTest {
 
     @Mock
-    private PersonRepository personRepository;
+    private IPersonRepository personRepository;
 
     @InjectMocks
     private PersonService personService;

@@ -1,59 +1,69 @@
 package com.SafetyNet.SafetyNet.controller;
 
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-import com.SafetyNet.SafetyNet.service.MedicalRecordService;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.service.contracts.IMedicalRecordService;
+
 @RestController
-@RequestMapping("/medicalRecord")
+
 public class MedicalRecordController {
 
-    private final MedicalRecordService medicalRecordService;
+    @Autowired
+    private IMedicalRecordService iMedicalRecordService;
 
-    public MedicalRecordController(MedicalRecordService medicalRecordService) {
-        this.medicalRecordService = medicalRecordService;
-    }
-
-    @GetMapping
+    @GetMapping("/medicalRecords")
     public ResponseEntity<List<MedicalRecord>> getAllMedicalRecords() {
-        List<MedicalRecord> medicalRecords = medicalRecordService.getAllMedicalRecords();
-        return ResponseEntity.ok(medicalRecords);
-    }
+        List<MedicalRecord> medicalRecords = iMedicalRecordService.getAllMedicalRecords();
 
-    @PostMapping
-    public ResponseEntity<MedicalRecord> addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
-        MedicalRecord addedRecord = medicalRecordService.addMedicalRecord(medicalRecord);
-        return ResponseEntity.status(HttpStatus.CREATED).body(addedRecord);
-    }
-
-    @PutMapping("/{firstName}/{lastName}")
-    public ResponseEntity<MedicalRecord> updateMedicalRecord(
-            @PathVariable String firstName,
-            @PathVariable String lastName,
-            @RequestBody MedicalRecord updatedMedicalRecord
-    ) {
-        MedicalRecord updatedRecord = medicalRecordService.updateMedicalRecord(firstName, lastName, updatedMedicalRecord);
-        if (updatedRecord != null) {
-            return ResponseEntity.ok(updatedRecord);
+        if (!medicalRecords.isEmpty()) {
+            return new ResponseEntity<>(medicalRecords, HttpStatus.OK);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/{firstName}/{lastName}")
-    public ResponseEntity<Void> deleteMedicalRecord(
-            @PathVariable String firstName,
-            @PathVariable String lastName
-    ) {
-        boolean deleted = medicalRecordService.deleteMedicalRecord(firstName, lastName);
-        if (deleted) {
-            return ResponseEntity.noContent().build();
+    @PostMapping("/medicalRecord")
+    public ResponseEntity<MedicalRecord> addMedicalRecord(@RequestBody MedicalRecord medicalRecord) {
+        MedicalRecord addedRecord = iMedicalRecordService.addMedicalRecord(medicalRecord);
+
+        if (addedRecord != null) {
+            return new ResponseEntity<>(addedRecord, HttpStatus.CREATED);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/medicalRecords/{firstName}/{lastName}")
+    public ResponseEntity<MedicalRecord> updateMedicalRecord(@PathVariable String firstName, @PathVariable String lastName, @RequestBody MedicalRecord medicalRecordUpdate) {
+        MedicalRecord updatedMedicalRecord = iMedicalRecordService.updateMedicalRecord(firstName, lastName, medicalRecordUpdate);
+
+        if (updatedMedicalRecord != null) {
+            return new ResponseEntity<>(updatedMedicalRecord, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/medicalRecords/{firstName}/{lastName}")
+    public ResponseEntity<Void> deleteMedicalRecord(@PathVariable String firstName, @PathVariable String lastName) {
+        boolean deleted = iMedicalRecordService.deleteMedicalRecord(firstName, lastName);
+
+        if (deleted) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

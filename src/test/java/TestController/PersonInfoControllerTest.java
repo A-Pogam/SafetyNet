@@ -2,36 +2,29 @@ package TestController;
 
 import com.SafetyNet.SafetyNet.SafetyNetApplication;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.SafetyNet.SafetyNet.controller.PersonInfoController;
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.controller.PersonController;
 import com.SafetyNet.SafetyNet.model.Person;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import com.SafetyNet.SafetyNet.service.FireStationService;
-import com.SafetyNet.SafetyNet.service.MedicalRecordService;
+import org.springframework.boot.test.context.SpringBootTest;
 import com.SafetyNet.SafetyNet.service.PersonService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(classes = SafetyNetApplication.class)
 @AutoConfigureMockMvc
-
-
-public class PersonInfoControllerTest {
+public class PersonControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -39,60 +32,80 @@ public class PersonInfoControllerTest {
     @Mock
     private PersonService personService;
 
-    @Mock
-    private MedicalRecordService medicalRecordService;
+    @InjectMocks
+    private PersonController personController;
 
-    @Mock
-    private FireStationService fireStationService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Test
+    void testGetAllPersons() throws Exception {
+        // Given
+        List<Person> persons = new ArrayList<>();
+        persons.add(new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com"));
+        when(personService.getAllPersons()).thenReturn(persons);
 
-    private PersonInfoController personInfoController;
-
-    @BeforeEach
-    void setUp() {
-        personInfoController = new PersonInfoController(personService, medicalRecordService, fireStationService);
+        // When & Then
+        mockMvc.perform(get("/person"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].firstname").value("John"));
     }
 
     @Test
-    public void testGetPersonInfo() {
-        // Créer un objet Person
-        Person person = new Person("John", "Doe", "123 Main St", "Wonderland", "42", "1234567890", "john@example.com");
+    void testAddPerson_Success() throws Exception {
+        // Given
+        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
+        when(personService.personExists(any(String.class), any(String.class))).thenReturn(false);
 
-        // Créer un objet MedicalRecord
-        MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setBirthdate("01/01/1990");
-        List<String> medications = new ArrayList<>();
-        medications.add("Medicine1");
-        medications.add("Medicine2");
-        medicalRecord.setMedications(medications);
+        // When & Then
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(person)))
+                .andExpect(status().isCreated())
+                .andExpect(content().string("Person added successfully"));
+    }
 
-        List<String> allergies = new ArrayList<>();
-        allergies.add("Pollen");
-        medicalRecord.setAllergies(allergies);
+    @Test
+    void testAddPerson_Failure() throws Exception {
+        // Given
+        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
 
-        // Définir le comportement des services mockés
-        when(personService.getPersonByName("John", "Doe")).thenReturn(person);
-        when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(medicalRecord);
-        when(fireStationService.calculateAge("01/01/1990")).thenReturn(32); // Mocking the age calculation
+        // Configurer le comportement du mock pour retourner vrai, indiquant que la personne existe déjà
+        when(personService.personExists(person.getFirstname(), person.getLastname())).thenReturn(true);
 
-        // Appeler la méthode à tester
-        ResponseEntity<?> responseEntity = personInfoController.getPersonInfo("John", "Doe");
+        // When & Then
+        mockMvc.perform(post("/person")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(person)))
+                // S'attendre à un statut HTTP 400 (Bad Request)
+                .andExpect(status().isBadRequest())
+                // Vérifier que le corps de la réponse contient le message "Person already exists"
+                .andExpect(content().string("Person already exists"));
+    }
 
-        // Vérifier si la réponse est OK
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    @Test
+    void testUpdatePerson() throws Exception {
+        // Given
+        Person updatedPerson = new Person("John", "Doe", "123 Main St", "Springfield", "12345", "123-456-7890", "john.doe@example.com");
 
-        // Vérifier les détails de la personne dans la réponse
-        Map<String, Object> expectedDetails = new HashMap<>();
-        expectedDetails.put("name", "John Doe");
-        expectedDetails.put("address", "123 Main St");
-        expectedDetails.put("email", "john@example.com");
-        expectedDetails.put("phone", "1234567890");
-        expectedDetails.put("age", 32);
-        expectedDetails.put("medications", "Medicine1, Medicine2");
-        expectedDetails.put("allergies", "Pollen");
+        // Configurer le comportement du mock pour la méthode updatePerson de PersonService
+        when(personService.updatePerson("John", "Doe", updatedPerson)).thenReturn(true);
 
-        assertEquals(expectedDetails, responseEntity.getBody());
+        // When & Then
+        mockMvc.perform(put("/person/John/Doe")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedPerson)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Person updated successfully"));
+    }
+
+    @Test
+    void testDeletePerson() throws Exception {
+        // Given
+        String firstName = "John";
+        String lastName = "Doe";
+
+        // When & Then
+        mockMvc.perform(delete("/person/{firstName}/{lastName}", firstName, lastName))
+                .andExpect(status().isNoContent());
     }
 }

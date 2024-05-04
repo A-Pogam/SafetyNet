@@ -1,69 +1,73 @@
 package com.SafetyNet.SafetyNet.service;
 
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.repository.contracts.IMedicalRecordRepository;
+import com.SafetyNet.SafetyNet.service.contracts.IMedicalRecordService;
 
 
 @Service
-public class MedicalRecordService {
+public class MedicalRecordService implements IMedicalRecordService {
+
     private static final Logger logger = LoggerFactory.getLogger(MedicalRecordService.class);
 
-    private final List<MedicalRecord> medicalRecords = new ArrayList<>();
+    @Autowired
+    private IMedicalRecordRepository iMedicalRecordRepository;
 
+    @Override
     public List<MedicalRecord> getAllMedicalRecords() {
-        logger.info("Retrieving all medical records");
-        return new ArrayList<>(medicalRecords);
+        return iMedicalRecordRepository.findAll();
     }
 
+    @Override
     public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
-        logger.info("Adding medical record: {}", medicalRecord);
-        medicalRecords.add(medicalRecord);
-        logger.info("Medical record added successfully");
-        return medicalRecord;
+        for(MedicalRecord existingMedicalRecord : iMedicalRecordRepository.findAll()) {
+            if(medicalRecord.getFirstName().equals(existingMedicalRecord.getFirstName()) && medicalRecord.getLastName().equals(existingMedicalRecord.getLastName())) {
+                logger.warn("Medical record already exists: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+                return null;
+            }
+        }
+
+        return iMedicalRecordRepository.save(medicalRecord);
     }
 
-    public MedicalRecord updateMedicalRecord(String firstName, String lastName, MedicalRecord updatedMedicalRecord) {
-        MedicalRecord existingRecord = getMedicalRecordByName(firstName, lastName);
-        if (existingRecord != null) {
-            logger.info("Updating medical record for person with name: {}, {}", firstName, lastName);
-            existingRecord.setBirthdate(updatedMedicalRecord.getBirthdate());
-            existingRecord.setMedications(updatedMedicalRecord.getMedications());
-            existingRecord.setAllergies(updatedMedicalRecord.getAllergies());
-            logger.info("Medical record updated successfully");
-            return existingRecord;
+    @Override
+    public MedicalRecord updateMedicalRecord(String firstName, String lastName, MedicalRecord medicalRecordUpdate) {
+        MedicalRecord existingMedicalRecord = iMedicalRecordRepository.findByFirstNameAndLastName(firstName, lastName);
+
+        if (existingMedicalRecord != null) {
+            return iMedicalRecordRepository.update(existingMedicalRecord, medicalRecordUpdate);
         } else {
-            logger.warn("No medical record found for update for person with name: {}, {}", firstName, lastName);
+            logger.warn("No medical record found for update for person with name: {} {}", firstName, lastName);
             return null;
         }
     }
 
+    @Override
     public boolean deleteMedicalRecord(String firstName, String lastName) {
-        logger.info("Deleting medical record for person with name: {}, {}", firstName, lastName);
-        Iterator<MedicalRecord> iterator = medicalRecords.iterator();
-        while (iterator.hasNext()) {
-            MedicalRecord existingRecord = iterator.next();
-            if (existingRecord.getFirstName().equals(firstName) && existingRecord.getLastName().equals(lastName)) {
-                iterator.remove();
-                logger.info("Medical record deleted successfully");
-                return true;
-            }
+        MedicalRecord matchingMedicalRecord = iMedicalRecordRepository.findByFirstNameAndLastName(firstName, lastName);
+
+        if (matchingMedicalRecord != null) {
+            iMedicalRecordRepository.deleteByFirstNameAndLastName(firstName, lastName);
+            return true;
+        } else {
+            logger.warn("No medical record found for deletion with name: {} {}", firstName, lastName);
+            return false;
         }
-        logger.warn("No medical record found for deletion for person with name: {}, {}", firstName, lastName);
-        return false;
     }
 
-    public MedicalRecord getMedicalRecordByName(String firstName, String lastName) {
-        logger.info("Retrieving medical record for person with name: {}, {}", firstName, lastName);
-        return medicalRecords.stream()
-                .filter(record -> record.getFirstName().equals(firstName) && record.getLastName().equals(lastName))
-                .findFirst()
-                .orElse(null);
+    @Override
+    public int calculateAge(LocalDate birthdate) {
+        int age = Period.between(birthdate, LocalDate.now()).getYears();
+        logger.info("Age calculated successfully: {}", age);
+        return age;
     }
 }

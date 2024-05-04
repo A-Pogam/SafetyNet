@@ -1,19 +1,76 @@
+
 package com.SafetyNet.SafetyNet.repository;
 
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-
+import java.util.ArrayList;
 import java.util.List;
 
-public interface MedicalRecordRepository {
-    MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Repository;
 
-    MedicalRecord save(MedicalRecord medicalRecord);
+import com.SafetyNet.SafetyNet.model.MedicalRecord;
+import com.SafetyNet.SafetyNet.repository.contracts.IMedicalRecordRepository;
 
-    void deleteByFirstNameAndLastName(String firstName, String lastName);
+@Repository
+public class MedicalRecordRepository implements IMedicalRecordRepository {
 
-    List<MedicalRecord> findAll();
+    private static final Logger logger = LoggerFactory.getLogger(MedicalRecordRepository.class);
 
-    MedicalRecord findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(
-            String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies
-    );
+    private List<MedicalRecord> medicalRecords = new ArrayList<>();
+
+    @Override
+    public List<MedicalRecord> findAll() {
+        logger.info("Retrieving all medical records");
+        return new ArrayList<>(medicalRecords);
+    }
+
+    @Override
+    public MedicalRecord findByFirstNameAndLastName(String firstName, String lastName) {
+        logger.info("Searching for medical record with name: {} {}", firstName, lastName);
+        return medicalRecords.stream()
+                .filter(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
+    public MedicalRecord save(MedicalRecord medicalRecord) {
+        logger.info("Adding medical record: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+        medicalRecords.add(medicalRecord);
+        logger.info("Medical record added successfully");
+
+        return medicalRecord;
+    }
+
+    @Override
+    public MedicalRecord update(MedicalRecord existingMedicalRecord, MedicalRecord medicalRecordUpdate) {
+        logger.info("Updating medical record for person with name: {} {}", existingMedicalRecord.getFirstName(), existingMedicalRecord.getLastName());
+
+        if (medicalRecordUpdate.getFirstName() != null) {
+            existingMedicalRecord.setFirstName(medicalRecordUpdate.getFirstName());
+        }
+        if (medicalRecordUpdate.getLastName() != null) {
+            existingMedicalRecord.setLastName(medicalRecordUpdate.getLastName());
+        }
+        if (medicalRecordUpdate.getBirthdate() != null) {
+            existingMedicalRecord.setBirthdate(medicalRecordUpdate.getBirthdate());
+        }
+        if (medicalRecordUpdate.getMedications() != null) {
+            existingMedicalRecord.setMedications(medicalRecordUpdate.getMedications());
+        }
+        if (medicalRecordUpdate.getAllergies() != null) {
+            existingMedicalRecord.setAllergies(medicalRecordUpdate.getAllergies());
+        }
+
+        logger.info("Medical record updated successfully");
+        return existingMedicalRecord;
+    }
+
+    @Override
+    public void deleteByFirstNameAndLastName(String firstName, String lastName) {
+        // Implémentation de la suppression d'une personne par prénom et nom
+        logger.info("Deleting medical record with name: {} {}", firstName, lastName);
+        medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
+        logger.info("Medical record deleted successfully");
+    }
 }

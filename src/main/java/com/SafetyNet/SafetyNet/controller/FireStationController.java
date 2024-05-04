@@ -1,67 +1,70 @@
+
 package com.SafetyNet.SafetyNet.controller;
 
-import com.SafetyNet.SafetyNet.dto.FireStationCoverage;
-import com.SafetyNet.SafetyNet.model.FireStation;
-import com.SafetyNet.SafetyNet.service.FireStationService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.SafetyNet.SafetyNet.model.FireStation;
+import com.SafetyNet.SafetyNet.service.contracts.IFireStationService;
 
 @RestController
 public class FireStationController {
 
-    private final FireStationService fireStationService;
-
-    public FireStationController(FireStationService fireStationService) {
-        this.fireStationService = fireStationService;
-    }
+    @Autowired
+    private IFireStationService iFireStationService;
 
     @GetMapping("/firestations")
     public ResponseEntity<List<FireStation>> getAllFireStations() {
-        return ResponseEntity.ok(fireStationService.getAllFireStations());
+        List<FireStation> firestations = iFireStationService.getAllFireStations();
+
+        if (!firestations.isEmpty()) {
+            return new ResponseEntity<>(firestations, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @PostMapping("/firestations")
+    @PostMapping("/firestation")
     public ResponseEntity<FireStation> addMapping(@RequestBody FireStation fireStation) {
-        return ResponseEntity.ok(fireStationService.addMapping(fireStation));
+        FireStation addedFirestation = iFireStationService.addMapping(fireStation);
+
+        if (addedFirestation != null) {
+            return new ResponseEntity<>(addedFirestation, HttpStatus.CREATED);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @PutMapping("/firestations/{address}")
-    public ResponseEntity<FireStation> updateFireStationNumber(
-            @PathVariable String address,
-            @RequestParam int stationNumber
-    ) {
-        FireStation updatedMapping = fireStationService.updateFireStationNumber(address, stationNumber);
-        return updatedMapping != null ? ResponseEntity.ok(updatedMapping) : ResponseEntity.notFound().build();
+    @PutMapping("/firestations/{address}/{stationNumber}")
+    public ResponseEntity<FireStation> updateFireStationNumber(@PathVariable String address, @PathVariable int stationNumber, @RequestParam int newStationNumber) {
+        FireStation updatedMapping = iFireStationService.updateFireStationNumber(address, stationNumber, newStationNumber);
+
+        if (updatedMapping != null) {
+            return new ResponseEntity<>(updatedMapping, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @DeleteMapping("/firestations/{address}")
-    public ResponseEntity<Void> deleteMapping(@PathVariable String address) {
-        return fireStationService.deleteMapping(address) ?
-                ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    @DeleteMapping("/firestations/{address}/{stationNumber}")
+    public ResponseEntity<Void> deleteMapping(@PathVariable String address, @PathVariable int stationNumber) {
+        boolean deleted = iFireStationService.deleteMapping(address, stationNumber);
+
+        if (deleted) {
+            return new ResponseEntity<>( HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-
-    @GetMapping("/firestation")
-    public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam("stationNumber") int stationNumber) {
-        FireStationCoverage coverage = fireStationService.getCoverageByStationNumber(stationNumber);
-        return coverage != null ? ResponseEntity.ok(coverage) : ResponseEntity.notFound().build();
-    }
-
-    @GetMapping("/fire")
-    public ResponseEntity<?> getResidentsAndFireStation(@RequestParam("address") String address) {
-        Map<String, Object> response = fireStationService.getResidentsAndFireStation(address);
-        return response != null ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
-    }
-
-
-    @GetMapping("/flood/stations")
-    public ResponseEntity<?> getFloodStations(@RequestParam("stations") List<Integer> stationNumbers) {
-        List<FireStation> floodStations = fireStationService.getFloodStationsAsFireStations(stationNumbers);
-        return ResponseEntity.ok(floodStations);
-    }
-
-
 }

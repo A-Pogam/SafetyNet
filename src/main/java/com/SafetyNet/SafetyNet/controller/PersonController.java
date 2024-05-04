@@ -1,64 +1,64 @@
 package com.SafetyNet.SafetyNet.controller;
 
-import com.SafetyNet.SafetyNet.model.Person;
-import com.SafetyNet.SafetyNet.service.PersonService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
-import java.util.List;
+import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.service.contracts.IPersonService;
 
 @Controller
-@RequestMapping("/person")
 public class PersonController {
 
-    private final PersonService personService;
-
     @Autowired
-    public PersonController(PersonService personService) {
-        this.personService = personService;
-    }
+    private IPersonService iPersonService;
 
-    @GetMapping
+    @GetMapping("/persons")
     public ResponseEntity<List<Person>> getAllPersons() {
-        List<Person> persons = personService.getAllPersons();
-        return ResponseEntity.ok(persons);
+        List<Person> persons = iPersonService.getAllPersons();
+
+        return new ResponseEntity<>(persons, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<String> addPerson(@RequestBody Person person) {
-        Person addedPerson = personService.addPerson(person);
+    @PostMapping("/person")
+    public ResponseEntity<Person> addPerson(@RequestBody Person person) {
+        Person addedPerson = iPersonService.addPerson(person);
+
         if (addedPerson != null) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("Person added successfully");
+            return new ResponseEntity<>(addedPerson, HttpStatus.CREATED);
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add this person");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
-    @PutMapping("/{firstName}/{lastName}")
-    public ResponseEntity<String> updatePerson(
-            @PathVariable String firstName,
-            @PathVariable String lastName,
-            @RequestBody Person updatedPerson) {
-        boolean updated = personService.updatePerson(firstName, lastName, updatedPerson);
-        if (updated) {
-            return ResponseEntity.ok("Person updated successfully");
+    @PutMapping("/persons/{firstName}/{lastName}")
+    public ResponseEntity<Person> updatePerson(@PathVariable String firstName, @PathVariable String lastName, @RequestBody Person personUpdate) {
+        Person updatedPerson  = iPersonService.updatePerson(firstName, lastName, personUpdate);
+
+        if (updatedPerson != null) {
+            return new ResponseEntity<>(updatedPerson, HttpStatus.OK);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
-    @DeleteMapping("/{firstName}/{lastName}")
-    public ResponseEntity<String> deletePerson(
-            @PathVariable String firstName,
-            @PathVariable String lastName) {
-        boolean deleted = personService.deletePerson(firstName, lastName);
+    @DeleteMapping("/persons/{firstName}/{lastName}")
+    public ResponseEntity<Void> deletePerson(@PathVariable String firstName, @PathVariable String lastName) {
+        boolean deleted = iPersonService.deletePerson(firstName, lastName);
+
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            return ResponseEntity.notFound().build();
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }

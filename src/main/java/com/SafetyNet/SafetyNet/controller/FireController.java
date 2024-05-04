@@ -1,6 +1,7 @@
+
 package com.SafetyNet.SafetyNet.controller;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,20 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.SafetyNet.SafetyNet.service.contracts.IFireStationService;
 
 @RestController
-public class PhoneAlertController {
+public class FireController {
 
     @Autowired
     private IFireStationService iFireStationService;
 
-    @GetMapping("/phoneAlert")
-    public ResponseEntity<List<String>> getPhoneAlert(@RequestParam("firestation") int stationNumber) {
-        List<String> phoneNumbers = iFireStationService.getPhoneNumbersServedByFireStation(stationNumber);
+    @GetMapping("/fire")
+    public ResponseEntity<Map<String, Object>> getResidentsAndFireStationByAddress(@RequestParam("address") String address) {
+        Map<String, Object> residentsAndFireStations = iFireStationService.getResidentsAndFireStationByAddress(address);
 
-        if (!phoneNumbers.isEmpty()) {
-            return new ResponseEntity<>(phoneNumbers, HttpStatus.OK);
+        if (residentsAndFireStations != null) {
+            return new ResponseEntity<>(residentsAndFireStations, HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 }

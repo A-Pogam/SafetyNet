@@ -5,18 +5,17 @@ import jakarta.persistence.Entity;
 @Entity
 public class Person {
 
-
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
     private String address;
     private String city;
     private String zip;
     private String phone;
     private String email;
 
-    public Person(String firstname, String lastname, String address, String city, String zip, String phone, String email) {
-        this.firstname = firstname;
-        this.lastname = lastname;
+    public Person(String firstName, String lastName, String address, String city, String zip, String phone, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.address = address;
         this.city = city;
         this.zip = zip;
@@ -25,19 +24,19 @@ public class Person {
     }
 
     public String getFirstname() {
-        return firstname;
+        return firstName;
     }
 
     public void setFirstname(String firstname) {
-        this.firstname = firstname;
+        this.firstName = firstname;
     }
 
     public String getLastname() {
-        return lastname;
+        return lastName;
     }
 
     public void setLastname(String lastname) {
-        this.lastname = lastname;
+        this.lastName = lastname;
     }
 
     public String getAddress() {

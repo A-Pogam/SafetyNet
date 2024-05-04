@@ -1,22 +1,22 @@
+
 package com.SafetyNet.SafetyNet.model;
 
-import jakarta.persistence.Entity;
-
+import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.persistence.Entity;
 
 @Entity
 public class MedicalRecord {
 
-
-
     private String firstName;
     private String lastName;
-    private String birthdate;
+    private LocalDate birthdate;
 
     private List<String> medications;
     private List<String> allergies;
 
-    public MedicalRecord(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies) {
+    public MedicalRecord(String firstName, String lastName, LocalDate birthdate, List<String> medications, List<String> allergies) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.birthdate = birthdate;
@@ -40,7 +40,7 @@ public class MedicalRecord {
         this.lastName = lastName;
     }
 
-    public void setBirthdate(String birthdate) {
+    public void setBirthdate(LocalDate birthdate) {
         this.birthdate = birthdate;
     }
 
@@ -52,7 +52,7 @@ public class MedicalRecord {
         this.allergies = allergies;
     }
 
-    public String getBirthdate() {
+    public LocalDate getBirthdate() {
         return birthdate;
     }
 
