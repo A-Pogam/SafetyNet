@@ -1,21 +1,18 @@
 package com.SafetyNet.SafetyNet.model;
 
-import jakarta.persistence.Entity;
-
-@Entity
 public class Person {
 
-    private String firstName;
-    private String lastName;
+    private String firstname;
+    private String lastname;
     private String address;
     private String city;
     private String zip;
     private String phone;
     private String email;
 
-    public Person(String firstName, String lastName, String address, String city, String zip, String phone, String email) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+    public Person(String firstname, String lastname, String address, String city, String zip, String phone, String email) {
+        this.firstname = firstname;
+        this.lastname = lastname;
         this.address = address;
         this.city = city;
         this.zip = zip;
@@ -24,19 +21,19 @@ public class Person {
     }
 
     public String getFirstname() {
-        return firstName;
+        return firstname;
     }
 
     public void setFirstname(String firstname) {
-        this.firstName = firstname;
+        this.firstname = firstname;
     }
 
     public String getLastname() {
-        return lastName;
+        return lastname;
     }
 
     public void setLastname(String lastname) {
-        this.lastName = lastname;
+        this.lastname = lastname;
     }
 
     public String getAddress() {

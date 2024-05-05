@@ -1,12 +1,8 @@
-
 package com.SafetyNet.SafetyNet.model;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.Entity;
-
-@Entity
 public class MedicalRecord {
 
     private String firstName;
