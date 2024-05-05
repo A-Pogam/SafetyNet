@@ -1,4 +1,3 @@
-
 package com.SafetyNet.SafetyNet.repository;
 
 import java.util.ArrayList;
@@ -20,13 +19,13 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
 
     @Override
     public List<MedicalRecord> findAll() {
-        logger.info("Retrieving all medical records");
+        logger.debug("Searching for all medical records.");
         return new ArrayList<>(medicalRecords);
     }
 
     @Override
     public MedicalRecord findByFirstNameAndLastName(String firstName, String lastName) {
-        logger.info("Searching for medical record with name: {} {}", firstName, lastName);
+        logger.debug("Searching for for medical record with name: {} {}.", firstName, lastName);
         return medicalRecords.stream()
                 .filter(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName))
                 .findFirst()
@@ -35,16 +34,16 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
 
     @Override
     public MedicalRecord save(MedicalRecord medicalRecord) {
-        logger.info("Adding medical record: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+        logger.debug("Adding medical record: {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
         medicalRecords.add(medicalRecord);
-        logger.info("Medical record added successfully");
+        logger.info("Medical record added successfully.");
 
         return medicalRecord;
     }
 
     @Override
     public MedicalRecord update(MedicalRecord existingMedicalRecord, MedicalRecord medicalRecordUpdate) {
-        logger.info("Updating medical record for person with name: {} {}", existingMedicalRecord.getFirstName(), existingMedicalRecord.getLastName());
+        logger.debug("Updating medical record for person with name: {} {}.", existingMedicalRecord.getFirstName(), existingMedicalRecord.getLastName());
 
         if (medicalRecordUpdate.getFirstName() != null) {
             existingMedicalRecord.setFirstName(medicalRecordUpdate.getFirstName());
@@ -62,15 +61,15 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
             existingMedicalRecord.setAllergies(medicalRecordUpdate.getAllergies());
         }
 
-        logger.info("Medical record updated successfully");
+        logger.info("Medical record updated successfully.");
         return existingMedicalRecord;
     }
 
     @Override
     public void deleteByFirstNameAndLastName(String firstName, String lastName) {
         // Implémentation de la suppression d'une personne par prénom et nom
-        logger.info("Deleting medical record with name: {} {}", firstName, lastName);
+        logger.debug("Deleting medical record with name: {} {}.", firstName, lastName);
         medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
-        logger.info("Medical record deleted successfully");
+        logger.info("Medical record deleted successfully.");
     }
 }

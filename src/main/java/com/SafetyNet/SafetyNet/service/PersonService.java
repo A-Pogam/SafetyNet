@@ -42,7 +42,7 @@ public class PersonService implements IPersonService {
     public Person addPerson(Person person) {
         for(Person existingPerson : iPersonRepository.findAll()) {
             if(person.getFirstname().equals(existingPerson.getFirstname()) && person.getLastname().equals(existingPerson.getLastname())) {
-                logger.warn("Person already exists: {} {}", person.getFirstname(), person.getLastname());
+                logger.error("Person already exists: {} {}.", person.getFirstname(), person.getLastname());
                 return null;
             }
         }
@@ -57,7 +57,7 @@ public class PersonService implements IPersonService {
         if (existingPerson != null) {
             return iPersonRepository.update(existingPerson, personUpdate);
         } else {
-            logger.warn("No person found for update for person with name: {} {}", firstName, lastName);
+            logger.error("Person not found for update: {} {}.", firstName, lastName);
             return null;
         }
     }
@@ -70,14 +70,14 @@ public class PersonService implements IPersonService {
             iPersonRepository.deleteByFirstNameAndLastName(firstName, lastName);
             return true;
         } else {
-            logger.warn("No person found for deletion with name: {} {}", firstName, lastName);
+            logger.error("Person not found for deletion: {} {}.", firstName, lastName);
             return false;
         }
     }
 
     @Override
     public List<ChildInfo> getChildAlert(String address) {
-        logger.info("Received request to get child alert for address: {}", address);
+        logger.debug("Received request to get child alert for address: {}.", address);
 
         // Créer une liste pour stocker les informations sur les enfants
         List<ChildInfo> childrenInfos = new ArrayList<>();
@@ -107,12 +107,13 @@ public class PersonService implements IPersonService {
             }
         }
 
-        logger.info("Found {} children in the household for address: {}", childrenInfos.size(), address);
+        logger.info("Found {} children in the household for address: {}.", childrenInfos.size(), address);
         return childrenInfos;
     }
 
     @Override
     public List<String> getEmailsByCity(String city) {
+        logger.debug("Received request to get emails for city: {}.", city);
         List<String> emailsByCity = new ArrayList<String>();
 
         for(String email : iPersonRepository.findEmailsByCity(city)) {
@@ -121,17 +122,18 @@ public class PersonService implements IPersonService {
             }
         }
 
+        logger.info("Emails found for city: {}.", city);
         return emailsByCity;
     }
 
     @Override
     public Map<String, Object> getPersonInfo(String firstName, String lastName) {
-        logger.info("Received request to get person info: {} {}", firstName, lastName);
+        logger.debug("Received request to get person info: {} {}.", firstName, lastName);
 
         Person person = iPersonRepository.findByFirstNameAndLastName(firstName, lastName);
 
         if (person == null) {
-            logger.error("Person not found: {} {}", firstName, lastName);
+            logger.error("Person not found: {} {}.", firstName, lastName);
             return null;
         }
 
@@ -153,6 +155,7 @@ public class PersonService implements IPersonService {
             personDetails.put("allergies", medicalRecord.getAllergies());
         }
 
+        logger.info("Person info found: {} {}.", firstName, lastName);
         return personDetails;
     }
 }

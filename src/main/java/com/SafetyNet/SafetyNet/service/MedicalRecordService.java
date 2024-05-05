@@ -31,7 +31,7 @@ public class MedicalRecordService implements IMedicalRecordService {
     public MedicalRecord addMedicalRecord(MedicalRecord medicalRecord) {
         for(MedicalRecord existingMedicalRecord : iMedicalRecordRepository.findAll()) {
             if(medicalRecord.getFirstName().equals(existingMedicalRecord.getFirstName()) && medicalRecord.getLastName().equals(existingMedicalRecord.getLastName())) {
-                logger.warn("Medical record already exists: {} {}", medicalRecord.getFirstName(), medicalRecord.getLastName());
+                logger.error("Medical record already exists: {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
                 return null;
             }
         }
@@ -46,7 +46,7 @@ public class MedicalRecordService implements IMedicalRecordService {
         if (existingMedicalRecord != null) {
             return iMedicalRecordRepository.update(existingMedicalRecord, medicalRecordUpdate);
         } else {
-            logger.warn("No medical record found for update for person with name: {} {}", firstName, lastName);
+            logger.error("Medical record not found for update: {} {}.", firstName, lastName);
             return null;
         }
     }
@@ -59,7 +59,7 @@ public class MedicalRecordService implements IMedicalRecordService {
             iMedicalRecordRepository.deleteByFirstNameAndLastName(firstName, lastName);
             return true;
         } else {
-            logger.warn("No medical record found for deletion with name: {} {}", firstName, lastName);
+            logger.error("Medical record not found for deletion: {} {}.", firstName, lastName);
             return false;
         }
     }
@@ -67,7 +67,8 @@ public class MedicalRecordService implements IMedicalRecordService {
     @Override
     public int calculateAge(LocalDate birthdate) {
         int age = Period.between(birthdate, LocalDate.now()).getYears();
-        logger.info("Age calculated successfully: {}", age);
+
+        logger.debug("Age calculated successfully: {}.", age);
         return age;
     }
 }

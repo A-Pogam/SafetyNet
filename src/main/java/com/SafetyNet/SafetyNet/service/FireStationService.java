@@ -45,7 +45,7 @@ public class FireStationService implements IFireStationService {
     public FireStation addMapping(FireStation fireStation) {
         for (FireStation existingFireStation : iFireStationRepository.findAll()) {
             if ((fireStation.getStation() == existingFireStation.getStation()) && fireStation.getAddress().equals(existingFireStation.getAddress())) {
-                logger.warn("Firestation mapping already exists: {} {}", fireStation.getStation(), fireStation.getAddress());
+                logger.error("Firestation mapping already exists: {} - {}.", fireStation.getStation(), fireStation.getAddress());
                 return null;
             }
         }
@@ -60,7 +60,7 @@ public class FireStationService implements IFireStationService {
         if (existingFireStation != null) {
             return iFireStationRepository.updateFireStationNumber(existingFireStation, newStationNumber);
         } else {
-            logger.warn("Fire station mapping not found for address: {} - {}", address, stationNumber);
+            logger.error("Firestation mapping not found for update: {} - {}.", address, stationNumber);
             return null;
         }
     }
@@ -73,18 +73,14 @@ public class FireStationService implements IFireStationService {
             iFireStationRepository.deleteByAddressAndNumber(address, stationNumber);
             return true;
         } else {
-            logger.warn("No fire station mapping found for address: {}", address);
+            logger.error("Firestation mapping not found for deletion: {} - {}.", address, stationNumber);
             return false;
         }
     }
 
-
-
-
-
     @Override
     public FireStationCoverage getCoverageByStationNumber(int stationNumber) {
-        logger.info("Fetching coverage for fire station number: {}", stationNumber);
+        logger.debug("Fetching coverage for fire station number: {}.", stationNumber);
         List<CoveredPerson> coveredPeople = new ArrayList<>();
         int adultsCount = 0;
         int childrenCount = 0;
@@ -105,7 +101,6 @@ public class FireStationService implements IFireStationService {
                         }
                     }
                 }
-
             }
         }
 
@@ -114,19 +109,19 @@ public class FireStationService implements IFireStationService {
         coverageByFireStationNumber.setAdultsCount(adultsCount);
         coverageByFireStationNumber.setChildrenCount(childrenCount);
 
-        logger.info("Coverage fetched successfully for fire station number: {}", stationNumber);
+        logger.info("Coverage fetched successfully for fire station number: {}.", stationNumber);
         return coverageByFireStationNumber;
     }
 
     @Override
     public Map<String, Object> getResidentsAndFireStationByAddress(String address) {
-        logger.info("Fetching residents and fire station for address: {}", address);
+        logger.debug("Fetching residents and fire station for address: {}.", address);
 
         // Récupérer les numéro des casernes desservant l'adresse donnée
         List<Integer> fireStationNumbers = iFireStationRepository.findFireStationNumberByAddress(address);
 
         if (fireStationNumbers.isEmpty()) {
-            logger.warn("No fire station found for address: {}", address);
+            logger.error("No fire station found for address: {}.", address);
             return null; // Retourne null si aucune caserne de pompiers n'est trouvée pour l'adresse donnée
         }
 
@@ -156,7 +151,7 @@ public class FireStationService implements IFireStationService {
         response.put("fireStationNumbers", fireStationNumbers);
         response.put("residents", residentsInfo);
 
-        logger.info("Residents and fire station fetched successfully for address: {}", address);
+        logger.info("Residents and fire station fetched successfully for address: {}.", address);
         return response;
     }
 
@@ -169,6 +164,7 @@ public class FireStationService implements IFireStationService {
 
         // Pour chaque caserne d'incendie
         for (String floodStationAddress : floodStationsAddresses) {
+            logger.debug("Fetching residents and firestation for address: {}.", floodStationAddress);
             // Récupérer les personnes vivant à cette adresse
             List<Person> residents = iPersonRepository.findByAddress(floodStationAddress);
 
@@ -185,6 +181,7 @@ public class FireStationService implements IFireStationService {
                 // Récupérer le dossier médical de la personne
                 MedicalRecord medicalRecord = iMedicalRecordRepository.findByFirstNameAndLastName(resident.getFirstname(), resident.getLastname());
                 if (medicalRecord != null) {
+                    logger.debug("Fetching residents and medical records: {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
                     // Calculer l'âge à partir de la date de naissance
                     int age = iMedicalRecordService.calculateAge(medicalRecord.getBirthdate());
                     residentDetail.put("age", age);
@@ -207,23 +204,24 @@ public class FireStationService implements IFireStationService {
             floodStationsDetails.add(addressDetails);
         }
 
-        logger.info("Flood stations fetched successfully for station numbers: {}", stationNumbers);
+        logger.info("Residents and their medical records fetched successfully with firestations asked.");
         return floodStationsDetails;
     }
 
     @Override
     public List<String> getPhoneNumbersServedByFireStation(int stationNumber) {
-        logger.info("Received request to get phone numbers for fire station: {}", stationNumber);
+        logger.debug("Received request to get phone numbers for firestation: {}.", stationNumber);
         List<Person> personsCoveredByFireStation = new ArrayList<>();
 
         List<String> fireStationAddresses = iFireStationRepository.findFireStationAddressesByStationNumber(stationNumber);
+        logger.debug("Fetching residents and firestation: {}.", stationNumber);
         for (String fireStationAddress : fireStationAddresses) {
             personsCoveredByFireStation.addAll(iPersonRepository.findByAddress(fireStationAddress));
         }
 
         List<String> phoneNumbers = iPersonRepository.findPhonesFromPersonList(personsCoveredByFireStation);
 
-        logger.info("Retrieved phone numbers for fire station: {}", stationNumber);
+        logger.info("Retrieved phone numbers for firestation: {}.", stationNumber);
         return phoneNumbers;
     }
 }

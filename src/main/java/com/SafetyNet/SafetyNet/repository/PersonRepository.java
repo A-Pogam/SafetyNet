@@ -20,14 +20,14 @@ public class PersonRepository implements IPersonRepository {
 
     @Override
     public List<Person> findAll() {
-        logger.info("Retrieving all persons");
+        logger.debug("Searching for all persons.");
         return new ArrayList<>(persons);
     }
 
     @Override
     public List<Person> findByAddress(String address) {
         // Implémentation de la recherche par adresse
-        logger.info("Retrieving persons at the address: {}", address);
+        logger.debug("Searching for persons at the address: {}.", address);
         return persons.stream()
                 .filter(person -> person.getAddress().equalsIgnoreCase(address))
                 .collect(Collectors.toList());
@@ -35,6 +35,7 @@ public class PersonRepository implements IPersonRepository {
 
     @Override
     public List<Person> findHouseholdMembersByPerson(Person person) {
+        logger.debug("Searching for all persons living with: {} {}.", person.getFirstname(), person.getLastname());
         return findByAddress(person.getAddress())
                 .stream()
                 .filter(p -> !p.getFirstname().equals(person.getFirstname()) && !p.getLastname().equals(person.getLastname()))
@@ -44,7 +45,7 @@ public class PersonRepository implements IPersonRepository {
     @Override
     public List<String> findEmailsByCity(String city) {
         // Implémentation de la recherche des emails par ville
-        logger.info("Retrieving persons email in city: {}", city);
+        logger.debug("Searching for persons email in city: {}.", city);
         return persons.stream()
                 .filter(person -> person.getCity().equalsIgnoreCase(city))
                 .map(Person::getEmail)
@@ -53,6 +54,7 @@ public class PersonRepository implements IPersonRepository {
 
     @Override
     public List<String> findPhonesFromPersonList(List<Person> personList) {
+        logger.debug("Searching for persons phone numbers.");
         return persons.stream()
                 .filter(person -> personList.contains(person))
                 .map(Person::getPhone)
@@ -63,7 +65,7 @@ public class PersonRepository implements IPersonRepository {
     @Override
     public Person findByFirstNameAndLastName(String firstName, String lastName) {
         // Implémentation de la recherche par prénom et nom
-        logger.info("Searching for person with name: {} {}", firstName, lastName);
+        logger.info("Searching for person with name: {} {}.", firstName, lastName);
         return persons.stream()
                 .filter(person -> person.getFirstname().equalsIgnoreCase(firstName) && person.getLastname().equalsIgnoreCase(lastName))
                 .findFirst()
@@ -72,16 +74,16 @@ public class PersonRepository implements IPersonRepository {
 
     @Override
     public Person save(Person person) {
-        logger.info("Adding person: {} {}", person.getFirstname(), person.getLastname());
+        logger.debug("Adding person: {} {}.", person.getFirstname(), person.getLastname());
         persons.add(person);
-        logger.info("Person added successfully");
+        logger.info("Person added successfully.");
 
         return person;
     }
 
     @Override
     public Person update(Person existingPerson, Person personUpdate) {
-        logger.info("Updating medical record for person with name: {} {}", existingPerson.getFirstname(), existingPerson.getLastname());
+        logger.debug("Updating medical record for person with name: {} {}.", existingPerson.getFirstname(), existingPerson.getLastname());
 
         if (personUpdate.getAddress() != null) {
             existingPerson.setAddress(personUpdate.getAddress());
@@ -99,14 +101,14 @@ public class PersonRepository implements IPersonRepository {
             existingPerson.setEmail(personUpdate.getEmail());
         }
 
-        logger.info("Person updated successfully");
+        logger.info("Person updated successfully.");
         return existingPerson;
     }
 
     @Override
     public void deleteByFirstNameAndLastName(String firstName, String lastName) {
-        logger.info("Deleting person with name: {} {}", firstName, lastName);
+        logger.debug("Deleting person with name: {} {}.", firstName, lastName);
         persons.removeIf(person -> person.getFirstname().equalsIgnoreCase(firstName) && person.getLastname().equalsIgnoreCase(lastName));
-        logger.info("Person(s) deleted successfully");
+        logger.info("Person(s) deleted successfully.");
     }
 }
