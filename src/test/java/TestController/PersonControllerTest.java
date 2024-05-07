@@ -1,111 +1,150 @@
 package TestController;
 
-import com.SafetyNet.SafetyNet.SafetyNetApplication;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.SafetyNet.SafetyNet.controller.PersonController;
-import com.SafetyNet.SafetyNet.model.Person;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import com.SafetyNet.SafetyNet.service.PersonService;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import com.SafetyNet.SafetyNet.controller.PersonController;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = SafetyNetApplication.class)
-@AutoConfigureMockMvc
+import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.service.contracts.IPersonService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@WebMvcTest(controllers = PersonController.class)
 public class PersonControllerTest {
 
     @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private PersonService personService;
+    @MockBean
+    private IPersonService iPersonService;
 
-    @InjectMocks
-    private PersonController personController;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private Person firstPerson = new Person("Geralt", "De Riv", "Kaer Morhen", "Kaer Morhen", "12345", "0102030405", "geralt.deriv@kaermorhen.kdw");
+    private Person secondPerson = new Person("Cirilla", "Fiona Ellen Rianon", "Cintra", "Cintra", "54321", "0504030201", "ciri@kaermorhen.kdw");
 
     @Test
-    void testGetAllPersons() throws Exception {
-        // Given
-        List<Person> persons = new ArrayList<>();
-        persons.add(new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com"));
-        when(personService.getAllPersons()).thenReturn(persons);
+    public void getAllPersons_returnOk() throws Exception {
+        List<Person> persons = new ArrayList<>(Arrays.asList(firstPerson, secondPerson));
 
-        // When & Then
-        mockMvc.perform(get("/person"))
+        when(iPersonService.getAllPersons())
+                .thenReturn(persons);
+
+        mockMvc.perform(get("/persons")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].firstname").value("John"));
+                .andExpect(jsonPath("$.[*].firstname").isNotEmpty())
+                .andExpect(jsonPath("$.[*].lastname").isNotEmpty())
+                .andExpect(jsonPath("$.[*].address").isNotEmpty())
+                .andExpect(jsonPath("$.[*].city").isNotEmpty())
+                .andExpect(jsonPath("$.[*].zip").isNotEmpty())
+                .andExpect(jsonPath("$.[*].phone").isNotEmpty())
+                .andExpect(jsonPath("$.[*].email").isNotEmpty());
     }
 
     @Test
-    void testAddPerson_Success() throws Exception {
-        // Given
-        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
-        when(personService.personExists(any(String.class), any(String.class))).thenReturn(false);
+    public void getAllPersons_returnNotFound() throws Exception {
+        when(iPersonService.getAllPersons())
+                .thenReturn(new ArrayList<>());
 
-        // When & Then
+        mockMvc.perform(get("/persons")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void addPerson_returnCreated() throws Exception {
+        Person thirdPerson = new Person("Yennefer", "De Vengerberg", "Vengerberg", "Vengerberg", "24680", "0204060800", "yennefer@vengerberg.aed");
+
+        when(iPersonService.addPerson(any(Person.class)))
+                .thenReturn(thirdPerson);
+
         mockMvc.perform(post("/person")
+                        .content(objectMapper.writeValueAsString(thirdPerson))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(person)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(content().string("Person added successfully"));
+                .andExpect(jsonPath("$.firstname").value("Yennefer"))
+                .andExpect(jsonPath("$.lastname").value("De Vengerberg"))
+                .andExpect(jsonPath("$.address").value("Vengerberg"))
+                .andExpect(jsonPath("$.city").value("Vengerberg"))
+                .andExpect(jsonPath("$.zip").value("24680"))
+                .andExpect(jsonPath("$.phone").value("0204060800"))
+                .andExpect(jsonPath("$.email").value("yennefer@vengerberg.aed"));
     }
 
     @Test
-    void testAddPerson_Failure() throws Exception {
-        // Given
-        Person person = new Person("John", "Doe", "123 Main St", "Anytown", "12345", "555-555-5555", "john@example.com");
+    public void addPerson_returnBadRequest() throws Exception {
+        when(iPersonService.addPerson(any(Person.class)))
+                .thenReturn(null);
 
-        // Configurer le comportement du mock pour retourner vrai, indiquant que la personne existe déjà
-        when(personService.personExists(person.getFirstname(), person.getLastname())).thenReturn(true);
-
-        // When & Then
         mockMvc.perform(post("/person")
+                        .content(objectMapper.writeValueAsString(new Person()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(person)))
-                // S'attendre à un statut HTTP 400 (Bad Request)
-                .andExpect(status().isBadRequest())
-                // Vérifier que le corps de la réponse contient le message "Person already exists"
-                .andExpect(content().string("Person already exists"));
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testUpdatePerson() throws Exception {
-        // Given
-        Person updatedPerson = new Person("John", "Doe", "123 Main St", "Springfield", "12345", "123-456-7890", "john.doe@example.com");
+    public void updatePerson_returnOk() throws Exception {
+        Person modifiedSecondPerson = new Person("Cirilla", "Fiona Ellen Rianon", "Cintra", "Cintra", "98765", "0908070605", "ciri@kaermorhen.kdw");
 
-        // Configurer le comportement du mock pour la méthode updatePerson de PersonService
-        when(personService.updatePerson("John", "Doe", updatedPerson)).thenReturn(true);
+        when(iPersonService.updatePerson(anyString(), anyString(), any(Person.class)))
+                .thenReturn(modifiedSecondPerson);
 
-        // When & Then
-        mockMvc.perform(put("/person/John/Doe")
+        mockMvc.perform(put("/persons/{firstName}/{lastName}", "Cirilla", "Fiona Ellen Rianon")
+                        .content(objectMapper.writeValueAsString(modifiedSecondPerson))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedPerson)))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Person updated successfully"));
+                .andExpect(jsonPath("$.zip").value("98765"))
+                .andExpect(jsonPath("$.phone").value("0908070605"));
     }
 
     @Test
-    void testDeletePerson() throws Exception {
-        // Given
-        String firstName = "John";
-        String lastName = "Doe";
+    public void updatePerson_returnNotFound() throws Exception {
+        when(iPersonService.updatePerson(anyString(), anyString(), any(Person.class)))
+                .thenReturn(null);
 
-        // When & Then
-        mockMvc.perform(delete("/person/{firstName}/{lastName}", firstName, lastName))
+        mockMvc.perform(put("/persons/{firstName}/{lastName}", "Triss", "Merigold")
+                        .content(objectMapper.writeValueAsString(new Person()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deletePerson_returnNoContent() throws Exception {
+        when(iPersonService.deletePerson(anyString(), anyString()))
+                .thenReturn(true);
+
+        mockMvc.perform(delete("/persons/{firstName}/{lastName}", "Geralt", "De Riv"))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    public void deletePerson_returnNotFound() throws Exception {
+        when(iPersonService.deletePerson(anyString(), anyString()))
+                .thenReturn(false);
+
+        mockMvc.perform(delete("/persons/{firstName}/{lastName}", "Triss", "Merigold"))
+                .andExpect(status().isNotFound());
     }
 }

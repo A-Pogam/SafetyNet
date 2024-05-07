@@ -1,74 +1,57 @@
 package TestController;
 
-import com.SafetyNet.SafetyNet.controller.PhoneAlertController;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import com.SafetyNet.SafetyNet.service.FireStationService;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
+import com.SafetyNet.SafetyNet.controller.PhoneAlertController;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+import com.SafetyNet.SafetyNet.service.contracts.IFireStationService;
+
+@WebMvcTest(controllers = PhoneAlertController.class)
 public class PhoneAlertControllerTest {
 
-    @Mock
-    private FireStationService fireStationService;
+    @Autowired
+    private MockMvc mockMvc;
 
-    @InjectMocks
-    private PhoneAlertController phoneAlertController;
+    @MockBean
+    private IFireStationService iFireStationService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
+    @Test
+    public void getPhoneAlert_returnOk() throws Exception {
+        List<String> phoneNumbers = new ArrayList<>(Arrays.asList("0102030405", "0504030201"));
+
+        when(iFireStationService.getPhoneNumbersServedByFireStation(anyInt()))
+                .thenReturn(phoneNumbers);
+
+        mockMvc.perform(get("/phoneAlert")
+                        .param("firestation", "1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0]").value("0102030405"))
+                .andExpect(jsonPath("$.[1]").value("0504030201"));
     }
 
     @Test
-    public void testGetPhoneAlert_WithPhoneNumbers() {
-        // Fire stations list
-        List<Integer> fireStations = new ArrayList<>();
-        fireStations.add(1);
-        fireStations.add(2);
+    public void getPhoneAlert_returnNotFound() throws Exception {
+        when(iFireStationService.getPhoneNumbersServedByFireStation(anyInt()))
+                .thenReturn(new ArrayList<>());
 
-        // Mock phone numbers
-        List<String> phoneNumbers = new ArrayList<>();
-        phoneNumbers.add("1234567890");
-        phoneNumbers.add("9876543210");
-
-        // Mock service behavior
-        when(fireStationService.getPhoneNumbersServedByFireStations(fireStations)).thenReturn(phoneNumbers);
-
-        // Call the method under test
-        ResponseEntity<List<String>> responseEntity = phoneAlertController.getPhoneAlert(fireStations);
-
-        // Verify the response
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(phoneNumbers, responseEntity.getBody());
+        mockMvc.perform(get("/phoneAlert")
+                        .param("firestation", "7")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
-
-    @Test
-    public void testGetPhoneAlert_NoPhoneNumbers() {
-        // Fire stations list
-        List<Integer> fireStations = new ArrayList<>();
-        fireStations.add(1);
-        fireStations.add(2);
-
-        // Mock service behavior
-        when(fireStationService.getPhoneNumbersServedByFireStations(fireStations)).thenReturn(new ArrayList<>());
-
-        // Call the method under test
-        ResponseEntity<List<String>> responseEntity = phoneAlertController.getPhoneAlert(fireStations);
-
-        // Verify the response
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertTrue(responseEntity.getBody() == null || responseEntity.getBody().isEmpty()); // Check if the body is null or empty
-    }
-
 }

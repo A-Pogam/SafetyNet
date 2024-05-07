@@ -117,7 +117,7 @@ public class FireStationService implements IFireStationService {
     public Map<String, Object> getResidentsAndFireStationByAddress(String address) {
         logger.debug("Fetching residents and fire station for address: {}.", address);
 
-        // Récupérer les numéro des casernes desservant l'adresse donnée
+        // Récupérer les numéros des casernes desservant l'adresse donnée
         List<Integer> fireStationNumbers = iFireStationRepository.findFireStationNumberByAddress(address);
 
         if (fireStationNumbers.isEmpty()) {

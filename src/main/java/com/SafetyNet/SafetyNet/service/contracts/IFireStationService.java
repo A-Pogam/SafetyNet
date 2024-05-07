@@ -1,4 +1,3 @@
-
 package com.SafetyNet.SafetyNet.service.contracts;
 
 import java.util.List;
