@@ -1,290 +1,137 @@
 package TestController;
 
-import com.SafetyNet.SafetyNet.SafetyNetApplication;
-import com.SafetyNet.SafetyNet.controller.FireStationController;
-import com.SafetyNet.SafetyNet.controller.MedicalRecordController;
-import com.SafetyNet.SafetyNet.controller.PersonController;
-import com.SafetyNet.SafetyNet.dto.FireStationCoverage;
-import com.SafetyNet.SafetyNet.model.FireStation;
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-import com.SafetyNet.SafetyNet.model.Person;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-
-
-
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import com.SafetyNet.SafetyNet.service.FireStationService;
-import com.SafetyNet.SafetyNet.service.MedicalRecordService;
-import com.SafetyNet.SafetyNet.service.PersonService;
-
-
-import java.util.*;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
+import com.SafetyNet.SafetyNet.model.FireStation;
+import com.SafetyNet.SafetyNet.service.contracts.IFireStationService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
-@SpringBootTest(classes = SafetyNetApplication.class)
-@AutoConfigureMockMvc
+@WebMvcTest(controllers = FireStationController.class)
 public class FireStationControllerTest {
 
     @Autowired
+    private ObjectMapper objectMapper;
+    @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private FireStationService fireStationService;
+    @MockBean
+    private IFireStationService iFireStationService;
 
-    @Mock
-    private MedicalRecordService medicalRecordService;
-
-    @Mock
-    private PersonService personService;
-
-
-    @InjectMocks
-    private FireStationController fireStationController;
-
-    @InjectMocks
-    private MedicalRecordController medicalRecordController;
-
-    @InjectMocks
-    private PersonController personController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
+    private FireStation firstFireStationMapping = new FireStation("Kaer Morhen", 1);
+    private FireStation secondFireStationMapping = new FireStation("Cintra", 2);
 
     @Test
-    public void testGetFireStationCoverage() throws Exception {
-        // Mock FireStationCoverage object
-        FireStationCoverage fireStationCoverage = new FireStationCoverage();
+    public void getAllFireStations_returnOk() throws Exception {
+        List<FireStation> firestations = new ArrayList<>(Arrays.asList(firstFireStationMapping, secondFireStationMapping));
 
-        when(fireStationService.getCoverageByStationNumber(1)).thenReturn(fireStationCoverage);
+        when(iFireStationService.getAllFireStations())
+                .thenReturn(firestations);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/firestation?stationNumber=1"))
-                .andExpect(MockMvcResultMatchers.status().isOk());
-    }
-
-
-    @Test
-    public void testGetAllMedicalRecords() throws Exception {
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-        // Populate medicalRecords with mock data
-
-        when(medicalRecordService.getAllMedicalRecords()).thenReturn(medicalRecords);
-
-        mockMvc.perform(get("/medicalRecord"))
+        mockMvc.perform(get("/firestations")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$.[*].address").isNotEmpty())
+                .andExpect(jsonPath("$.[*].station").isNotEmpty());
     }
 
     @Test
-    public void testAddMedicalRecord() throws Exception {
-        MedicalRecord medicalRecord = new MedicalRecord();
+    public void getAllPersons_returnNotFound() throws Exception {
+        when(iFireStationService.getAllFireStations())
+                .thenReturn(new ArrayList<>());
 
-        when(medicalRecordService.addMedicalRecord(any())).thenReturn(medicalRecord);
+        mockMvc.perform(get("/firestations")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
-        mockMvc.perform(post("/medicalRecord")
+    @Test
+    public void addMapping_returnCreated() throws Exception {
+        FireStation thirdFireStationMapping = new FireStation("Vengerberg", 3);
+
+        when(iFireStationService.addMapping(any(FireStation.class)))
+                .thenReturn(thirdFireStationMapping);
+
+        mockMvc.perform(post("/firestation")
+                        .content(objectMapper.writeValueAsString(thirdFireStationMapping))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.firstName").value(medicalRecord.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(medicalRecord.getLastName()));
+                .andExpect(jsonPath("$.address").value("Vengerberg"))
+                .andExpect(jsonPath("$.station").value(3));
     }
 
-   /* @Test
-    public void testUpdateMedicalRecord() throws Exception {
-        // Créer un enregistrement médical simulé avec les données appropriées
-        MedicalRecord existingMedicalRecord = new MedicalRecord("John", "Doe", "02-08-1990",
-                Arrays.asList("ibuprofen"),
-                Arrays.asList("peanut"));
+    @Test
+    public void addMapping_returnBadRequest() throws Exception {
+        when(iFireStationService.addMapping(any(FireStation.class)))
+                .thenReturn(null);
 
-        // Ajouter l'enregistrement à la liste medicalRecords
-        List<MedicalRecord> medicalRecords = new ArrayList<>();
-        medicalRecords.add(existingMedicalRecord);
-
-        when(medicalRecordService.updateMedicalRecord(eq("John"), eq("Doe"), any(MedicalRecord.class)))
-                .thenAnswer(invocation -> {
-                    String firstName = invocation.getArgument(0);
-                    String lastName = invocation.getArgument(1);
-                    MedicalRecord medicalRecordToUpdate = invocation.getArgument(2);
-
-                    // Mettre à jour l'enregistrement médical simulé dans la liste medicalRecords
-                    for (MedicalRecord record : medicalRecords) {
-                        if (record.getFirstName().equals(firstName) && record.getLastName().equals(lastName)) {
-                            record.setBirthdate(medicalRecordToUpdate.getBirthdate());
-                            record.setMedications(medicalRecordToUpdate.getMedications());
-                            record.setAllergies(medicalRecordToUpdate.getAllergies());
-                            return record;
-                        }
-                    }
-                    return null;
-                });
-
-        mockMvc.perform(put("/medicalRecord/{firstName}/{lastName}", "John", "Doe")
+        mockMvc.perform(post("/firestation")
+                        .content(objectMapper.writeValueAsString(new FireStation()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"birthdate\":\"02-08-1990\",\"medications\":[\"ibuprofen\",\"aspirin\"],\"allergies\":[\"peanut\",\"pollen\"]}"))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void updateFireStationNumber_returnOk() throws Exception {
+        FireStation modifiedSecondFireStationMapping = new FireStation("Cintra", 7);
+
+        when(iFireStationService.updateFireStationNumber(anyString(), anyInt(), anyInt()))
+                .thenReturn(modifiedSecondFireStationMapping);
+
+        mockMvc.perform(put("/firestations/{address}/{stationNumber}", "Cintra", 2)
+                        .param("newStationNumber", "7")
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.firstName").value(existingMedicalRecord.getFirstName()))
-                .andExpect(jsonPath("$.lastName").value(existingMedicalRecord.getLastName()));
-
+                .andExpect(jsonPath("$.station").value(7));
     }
 
+    @Test
+    public void updateFireStationNumber_returnNotFound() throws Exception {
+        when(iFireStationService.updateFireStationNumber(anyString(), anyInt(), anyInt()))
+                .thenReturn(null);
 
+        mockMvc.perform(put("/firestations/{address}/{stationNumber}", "Mahakam", 4)
+                        .param("newStationNumber", "8")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
-    public void testDeleteMedicalRecord() throws Exception {
-        when(medicalRecordService.deleteMedicalRecord(any(), any())).thenReturn(true);
+    public void deleteMapping_returnNoContent() throws Exception {
+        when(iFireStationService.deleteMapping(anyString(), anyInt()))
+                .thenReturn(true);
 
-        mockMvc.perform(delete("/medicalRecord/{firstName}/{lastName}", "John", "Doe"))
+        mockMvc.perform(delete("/firestations/{address}/{stationNumber}", "Kaer Morhen", 1))
                 .andExpect(status().isNoContent());
-    } */
-
-   /* @Test
-    public void testDeleteMapping_Success() {
-        // Arrange
-        String address = "123 Main St";
-
-        // Mocking behavior
-        when(fireStationService.deleteMapping(address)).thenReturn(true);
-
-        // Act
-        boolean deletionSuccessful = fireStationController.deleteMapping(address);
-
-        // Assert
-        assertTrue(deletionSuccessful);
-        verify(fireStationService, times(1)).deleteMapping(address);
-    }
-
-
-    @Test
-    public void testDeleteMapping_Failure() {
-        // Arrange
-        String address = "456 Elm St";
-
-        // Mocking behavior
-        when(fireStationService.deleteMapping(address)).thenReturn(false);
-
-        // Act
-        boolean deletionSuccessful = fireStationController.deleteMapping(address);
-
-        // Assert
-        assertFalse(deletionSuccessful);
-        verify(fireStationService, times(1)).deleteMapping(address);
-    } */
-
-    @Test
-    public void testGetAllFireStations() throws Exception {
-        // Mock List of FireStation objects
-        List<FireStation> fireStations = new ArrayList<>();
-        // Ajoutez ici des objets FireStation à votre liste de simulation
-
-        // Mock FireStationService
-        when(fireStationService.getAllFireStations()).thenReturn(fireStations);
-
-        // Effectuer une requête HTTP GET vers l'URL /firestations
-        mockMvc.perform(MockMvcRequestBuilders.get("/firestations"))
-                // S'attend à ce que le statut de la réponse soit OK (200)
-                .andExpect(status().isOk());
     }
 
     @Test
-    public void testGetFloodStations() throws Exception {
-        // Mock List of Map<String, Object> objects representing flood stations details
-        List<Map<String, Object>> floodStationsDetails = new ArrayList<>();
+    public void deleteMapping_returnNotFound() throws Exception {
+        when(iFireStationService.deleteMapping(anyString(), anyInt()))
+                .thenReturn(false);
 
-        // Mock List of Person objects
-        List<Person> residents = new ArrayList<>();
-
-        // Mock Map of MedicalRecord objects
-        Map<String, MedicalRecord> medicalRecords = new HashMap<>();
-
-        // Mock FireStationService
-        when(fireStationService.getFloodStations(anyList())).thenReturn(floodStationsDetails);
-
-        // Mock PersonService
-        when(personService.getPersonsByAddress(anyString())).thenReturn(residents);
-
-        // Mock MedicalRecordService
-        when(medicalRecordService.getMedicalRecordByName(anyString(), anyString())).thenAnswer(new Answer<MedicalRecord>() {
-            @Override
-            public MedicalRecord answer(InvocationOnMock invocation) throws Throwable {
-                String firstName = invocation.getArgument(0);
-                String lastName = invocation.getArgument(1);
-                return medicalRecords.get(firstName + lastName);
-            }
-        });
-
-        // Perform an HTTP GET request to the /flood/stations URL with the required parameters
-        mockMvc.perform(MockMvcRequestBuilders.get("/flood/stations")
-                        .param("stations", "1", "2", "3"))
-                // Expects the response status to be OK (200)
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/firestations/{addeess}/{stationNumber}", "Mahakam", 5))
+                .andExpect(status().isNotFound());
     }
-
-
-    @Test
-    public void testGetResidentsAndFireStation_Success() {
-        // Given
-        String address = "123 Main St";
-
-        // Mocking the behavior of personService
-        List<Person> residents = new ArrayList<>();
-        residents.add(new Person("John", "Doe", "123 Main St", "Légume", "12", "1234", "john@exemple.com"));
-        residents.add(new Person("Jane", "Doe", "12 rue de la courgette", "Légume", "12", "1234", "jane@exemple.com"));
-
-        // Mocking the behavior of fireStationService
-        FireStationService fireStationService = mock(FireStationService.class);
-
-
-        // Creating a list of FireStation
-        List<FireStation> fireStations = new ArrayList<>();
-        fireStations.add(new FireStation("123 Main St", Integer.valueOf(1)));
-
-        // Creating the controller with mocked services and the list of FireStation
-        FireStationController fireStationController = new FireStationController(fireStationService);
-
-        // Mocking the expected behavior when calling methods on mocked services
-        when(fireStationService.getFireStationNumberByAddress(address)).thenReturn(1); // Assuming the fire station number for this address is 1
-        when(personService.getPersonsByAddress(address)).thenReturn(residents);
-
-
-        // Calling the method to be tested
-        ResponseEntity<?> responseEntity = fireStationController.getResidentsAndFireStation(address);
-
-        // Assertions on the response
-        assertEquals(200, responseEntity.getStatusCodeValue()); // Assuming the expected status code is 200
-    }
-
-
 }

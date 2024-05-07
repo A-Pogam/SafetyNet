@@ -17,7 +17,6 @@ import com.SafetyNet.SafetyNet.model.MedicalRecord;
 import com.SafetyNet.SafetyNet.service.contracts.IMedicalRecordService;
 
 @RestController
-
 public class MedicalRecordController {
 
     @Autowired

@@ -76,7 +76,7 @@ public class PersonRepository implements IPersonRepository {
     public Person save(Person person) {
         logger.debug("Adding person: {} {}.", person.getFirstname(), person.getLastname());
         persons.add(person);
-        logger.info("Person added successfully.");
+        logger.info("Person added successfully: {} {}.", person.getFirstname(), person.getLastname());
 
         return person;
     }
@@ -101,7 +101,7 @@ public class PersonRepository implements IPersonRepository {
             existingPerson.setEmail(personUpdate.getEmail());
         }
 
-        logger.info("Person updated successfully.");
+        logger.info("Person updated successfully: {} {}.", existingPerson.getFirstname(), existingPerson.getLastname());
         return existingPerson;
     }
 
@@ -109,6 +109,6 @@ public class PersonRepository implements IPersonRepository {
     public void deleteByFirstNameAndLastName(String firstName, String lastName) {
         logger.debug("Deleting person with name: {} {}.", firstName, lastName);
         persons.removeIf(person -> person.getFirstname().equalsIgnoreCase(firstName) && person.getLastname().equalsIgnoreCase(lastName));
-        logger.info("Person(s) deleted successfully.");
+        logger.info("Person(s) deleted successfully: {} {}.", firstName, lastName);
     }
 }

@@ -12,6 +12,10 @@ public class MedicalRecord {
     private List<String> medications;
     private List<String> allergies;
 
+    public MedicalRecord() {
+
+    }
+
     public MedicalRecord(String firstName, String lastName, LocalDate birthdate, List<String> medications, List<String> allergies) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -59,9 +63,4 @@ public class MedicalRecord {
     public List<String> getAllergies() {
         return allergies;
     }
-
-    public MedicalRecord() {
-        // Constructeur par défaut
-    }
-
 }

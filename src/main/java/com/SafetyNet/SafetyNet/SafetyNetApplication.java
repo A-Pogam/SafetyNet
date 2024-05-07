@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.FileCopyUtils;
 
@@ -29,8 +30,8 @@ import com.SafetyNet.SafetyNet.repository.contracts.IPersonRepository;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 
-
 @SpringBootApplication
+@ComponentScan
 public class SafetyNetApplication implements CommandLineRunner {
 	public static void main(String[] args) {
 		SpringApplication.run(SafetyNetApplication.class, args);
@@ -50,12 +51,12 @@ public class SafetyNetApplication implements CommandLineRunner {
 		try {
 			loadData();
 		} catch (Exception e) {
-			logger.error("Erreur lors du chargement des données.", e);
+			logger.error("Error while loading data.", e);
 		}
 	}
 
 	private void loadData() throws IOException {
-		logger.info("Début du chargement des données...");
+		logger.debug("Start loading data...");
 
 		Jsonb jsonb = JsonbBuilder.newBuilder().build();
 
@@ -71,11 +72,11 @@ public class SafetyNetApplication implements CommandLineRunner {
 		loadFireStations(data.get("firestations"));
 		loadPersons(data.get("persons"));
 
-		logger.info("Chargement des données terminé.");
+		logger.debug("Data loading complete.");
 	}
 
 	private void loadMedicalRecords(List<Map<String, Object>> medicalRecordsData) {
-		logger.info("Début du chargement des dossiers médicaux...");
+		logger.debug("Start loading medical records...");
 
 		medicalRecordsData.forEach(recordData -> {
 			MedicalRecord medicalRecord;
@@ -86,26 +87,26 @@ public class SafetyNetApplication implements CommandLineRunner {
 				e.printStackTrace();
 			}
 		});
-		logger.info("Chargement des dossiers médicaux terminé.");
+		logger.debug("Medical records loading complete.");
 	}
 
 	private void loadFireStations(List<Map<String, Object>> fireStationsData) {
-		logger.info("Début du chargement des casernes de pompier...");
+		logger.debug("Start loading of fire stations...");
 
 		fireStationsData.forEach(stationData -> {
 			FireStation fireStation = convertToFireStation(stationData);
 			iFireStationRepository.save(fireStation);
 		});
-		logger.info("Chargement des casernes de pompiers terminé.");
+		logger.debug("Fire stations loading complete.");
 	}
 
 	private void loadPersons(List<Map<String, Object>> personsData) {
-		logger.info("Début du chargement des personnes...");
+		logger.debug("Start loading people...");
 		personsData.forEach(personData -> {
 			Person person = convertToPerson(personData);
 			iPersonRepository.save(person);
 		});
-		logger.info("Chargement des personnes terminé.");
+		logger.debug("Persons loading complete.");
 	}
 
 	private MedicalRecord convertToMedicalRecord(Map<String, Object> data) throws Exception {

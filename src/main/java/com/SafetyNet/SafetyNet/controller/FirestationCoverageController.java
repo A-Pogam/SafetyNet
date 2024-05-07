@@ -1,4 +1,3 @@
-
 package com.SafetyNet.SafetyNet.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ public class FirestationCoverageController {
     private IFireStationService iFireStationService;
 
     @GetMapping("/firestation")
-    public ResponseEntity<FireStationCoverage> getFireStationCoverage(@RequestParam("stationNumber") int stationNumber) {
+    public ResponseEntity<FireStationCoverage> getCoverageByStationNumber(@RequestParam("stationNumber") int stationNumber) {
         FireStationCoverage fireStationCoverage = iFireStationService.getCoverageByStationNumber(stationNumber);
 
         if (!fireStationCoverage.getCoveragePeople().isEmpty()) {

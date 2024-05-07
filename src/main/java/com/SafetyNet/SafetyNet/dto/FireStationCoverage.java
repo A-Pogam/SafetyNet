@@ -7,6 +7,16 @@ public class FireStationCoverage {
     private int adultsCount;
     private int childrenCount;
 
+    public FireStationCoverage() {
+
+    }
+
+    public FireStationCoverage(List<CoveredPerson> coveredPeople, int adultsCount, int childreCount) {
+        this.coveredPeople = coveredPeople;
+        this.adultsCount = adultsCount;
+        this.childrenCount = childreCount;
+    }
+
     public void setCoveredPeople(List<CoveredPerson> coveredPeople) {
         this.coveredPeople = coveredPeople;
     }

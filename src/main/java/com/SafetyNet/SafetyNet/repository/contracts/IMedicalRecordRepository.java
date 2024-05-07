@@ -8,7 +8,6 @@ public interface IMedicalRecordRepository {
 
     List<MedicalRecord> findAll();
     MedicalRecord findByFirstNameAndLastName(String firstName, String lastName);
-    //MedicalRecord findByFirstNameAndLastNameAndBirthdateAndMedicationsAndAllergies(String firstName, String lastName, String birthdate, List<String> medications, List<String> allergies);
 
     MedicalRecord save(MedicalRecord medicalRecord);
     MedicalRecord update(MedicalRecord existingMedicalRecord, MedicalRecord medicalRecordUpdate);

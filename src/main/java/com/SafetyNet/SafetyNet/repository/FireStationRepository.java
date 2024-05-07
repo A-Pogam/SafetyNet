@@ -74,7 +74,7 @@ public class FireStationRepository implements IFireStationRepository {
     public FireStation save(FireStation fireStation) {
         logger.debug("Adding firestation mapping: {} - {}.", fireStation.getAddress(), fireStation.getStation());
         fireStations.add(fireStation);
-        logger.info("Firestation mapping added successfully.");
+        logger.info("Firestation mapping added successfully: {} - {}.", fireStation.getAddress(), fireStation.getStation());
 
         return fireStation;
     }
@@ -83,7 +83,7 @@ public class FireStationRepository implements IFireStationRepository {
     public FireStation updateFireStationNumber(FireStation existingFireStation, int newStationNumber) {
         logger.debug("Updating fire station {} at address: {}.", existingFireStation.getStation(), existingFireStation.getAddress());
         existingFireStation.setStation(newStationNumber);
-        logger.info("Fire station number updated successfully.");
+        logger.info("Fire station number updated successfully: {} - {}.", existingFireStation.getAddress(), existingFireStation.getStation());
 
         return existingFireStation;
     }
@@ -92,6 +92,6 @@ public class FireStationRepository implements IFireStationRepository {
     public void deleteByAddressAndNumber(String address, int stationNumber) {
         logger.debug("Deleting fire station {} mapping at address: {}.", stationNumber, address);
         fireStations.removeIf(fireStation -> fireStation.getAddress().equalsIgnoreCase(address) && fireStation.getStation() == stationNumber);
-        logger.info("Fire station deleted successfully.");
+        logger.info("Fire station deleted successfully: {} - {}", address, stationNumber);
     }
 }

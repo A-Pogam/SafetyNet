@@ -1,62 +1,57 @@
-/*package TestController;
+package TestController;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import controller.CommunityEmailController;
+import com.SafetyNet.SafetyNet.controller.CommunityEmailController;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import service.PersonService;
-import org.springframework.boot.test.context.SpringBootTest;
 
+import com.SafetyNet.SafetyNet.service.contracts.IPersonService;
 
-@SpringBootTest(classes = CommunityEmailController.class)
+@WebMvcTest(controllers = CommunityEmailController.class)
 public class CommunityEmailControllerTest {
 
-    @MockBean
-    private PersonService personService;
+	@Autowired
+	private MockMvc mockMvc;
 
-    @InjectMocks
-    private CommunityEmailController communityEmailController;
+	@MockBean
+	private IPersonService iPersonService;
 
-    @Test
-    public void testGetEmailsByCity_Success() {
-        // Given
-        String city = "Anytown";
-        List<String> emails = new ArrayList<>();
-        emails.add("email1@example.com");
-        emails.add("email2@example.com");
-        when(personService.getEmailsByCity(city)).thenReturn(emails);
+	@Test
+	public void getEmailsByCity_returnOk() throws Exception {
+		List<String> emails = new ArrayList<>(Arrays.asList("geralt.deriv@kaermorhen.kdw", "ciri@kaermorhen.kdw"));
 
-        // When
-        ResponseEntity<List<String>> responseEntity = communityEmailController.getEmailsByCity(city);
+		when(iPersonService.getEmailsByCity(anyString()))
+			.thenReturn(emails);
 
-        // Then
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertEquals(emails, responseEntity.getBody());
-    }
+		mockMvc.perform(get("/communityEmail")
+				.param("city", "Kaer Morhen")
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.[0]").value("geralt.deriv@kaermorhen.kdw"))
+			.andExpect(jsonPath("$.[1]").value("ciri@kaermorhen.kdw"));
+	}
 
-    @Test
-    public void testGetEmailsByCity_NoEmails() {
-        // Given
-        String city = "UnknownCity";
-        when(personService.getEmailsByCity(city)).thenReturn(null);
+	@Test
+	public void getEmailsByCity_returnNotFound() throws Exception {
+		when(iPersonService.getEmailsByCity(anyString()))
+			.thenReturn(new ArrayList<>());
 
-        // When
-        ResponseEntity<List<String>> responseEntity = communityEmailController.getEmailsByCity(city);
-
-        // Then
-        assertEquals(HttpStatus.NOT_FOUND, responseEntity.getStatusCode());
-        assertEquals(null, responseEntity.getBody());
-    }
-} */
+		mockMvc.perform(get("/communityEmail")
+				.param("city", "Mahakam")
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound());
+	}
+}

@@ -27,5 +27,4 @@ public class PhoneAlertController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
-
 }

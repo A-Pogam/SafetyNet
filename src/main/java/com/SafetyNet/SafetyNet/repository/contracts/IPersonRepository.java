@@ -1,11 +1,10 @@
-package com.SafetyNet.SafetyNet.repository.contracts;
 
-import com.SafetyNet.SafetyNet.model.Person;
-import org.springframework.stereotype.Repository;
+package com.SafetyNet.SafetyNet.repository.contracts;
 
 import java.util.List;
 
-@Repository
+import com.SafetyNet.SafetyNet.model.Person;
+
 public interface IPersonRepository {
 
     List<Person> findAll();

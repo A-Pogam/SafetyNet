@@ -1,98 +1,67 @@
 package TestController;
 
-import com.SafetyNet.SafetyNet.SafetyNetApplication;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.SafetyNet.SafetyNet.controller.PersonInfoController;
-import com.SafetyNet.SafetyNet.model.MedicalRecord;
-import com.SafetyNet.SafetyNet.model.Person;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import com.SafetyNet.SafetyNet.service.FireStationService;
-import com.SafetyNet.SafetyNet.service.MedicalRecordService;
-import com.SafetyNet.SafetyNet.service.PersonService;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import com.SafetyNet.SafetyNet.controller.ChildAlertController;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(classes = SafetyNetApplication.class)
-@AutoConfigureMockMvc
+import com.SafetyNet.SafetyNet.dto.ChildInfo;
+import com.SafetyNet.SafetyNet.model.Person;
+import com.SafetyNet.SafetyNet.service.contracts.IPersonService;
 
-
-public class PersonInfoControllerTest {
+@WebMvcTest(controllers = ChildAlertController.class)
+public class ChildAlertControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
-    private PersonService personService;
+    @MockBean
+    private IPersonService iPersonService;
 
-    @Mock
-    private MedicalRecordService medicalRecordService;
+    private Person firstPerson = new Person("Geralt", "De Riv", "Kaer Morhen", "Kaedwen", "12345", "0102030405", "geralt.deriv@kaermorhen.kdw");
+    private Person secondPerson = new Person("Vesemir", "De Kaer Morhen", "Kaer Morhen", "Kaedwen", "10101", "1100110011", "vesemir@kaermorhen.kdw");
 
-    @Mock
-    private FireStationService fireStationService;
+    private ChildInfo firstChildInfo = new ChildInfo("Ciri", "Fiona Ellen Rianon", 14, new ArrayList<>(Arrays.asList(firstPerson, secondPerson)));
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Test
+    public void getChildAlert_returnOk() throws Exception {
+        List<ChildInfo> childrenInfo = new ArrayList<>(Arrays.asList(firstChildInfo));
 
-    private PersonInfoController personInfoController;
+        when(iPersonService.getChildAlert(anyString()))
+                .thenReturn(childrenInfo);
 
-    @BeforeEach
-    void setUp() {
-        personInfoController = new PersonInfoController(personService, medicalRecordService, fireStationService);
+        mockMvc.perform(get("/childAlert")
+                        .param("address", "Kaer Morhen")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.[0].firstName").value("Ciri"))
+                .andExpect(jsonPath("$.[0].lastName").value("Fiona Ellen Rianon"))
+                .andExpect(jsonPath("$.[0].age").value(14))
+                .andExpect(jsonPath("$.[0].householdMembers.[0].firstname").value("Geralt"))
+                .andExpect(jsonPath("$.[0].householdMembers.[1].firstname").value("Vesemir"));
     }
 
     @Test
-    public void testGetPersonInfo() {
-        // Créer un objet Person
-        Person person = new Person("John", "Doe", "123 Main St", "Wonderland", "42", "1234567890", "john@example.com");
+    public void getChildAlert_returnNotFound() throws Exception {
+        when(iPersonService.getChildAlert(anyString()))
+                .thenReturn(new ArrayList<>());
 
-        // Créer un objet MedicalRecord
-        MedicalRecord medicalRecord = new MedicalRecord();
-        medicalRecord.setBirthdate("01/01/1990");
-        List<String> medications = new ArrayList<>();
-        medications.add("Medicine1");
-        medications.add("Medicine2");
-        medicalRecord.setMedications(medications);
-
-        List<String> allergies = new ArrayList<>();
-        allergies.add("Pollen");
-        medicalRecord.setAllergies(allergies);
-
-        // Définir le comportement des services mockés
-        when(personService.getPersonByName("John", "Doe")).thenReturn(person);
-        when(medicalRecordService.getMedicalRecordByName("John", "Doe")).thenReturn(medicalRecord);
-        when(fireStationService.calculateAge("01/01/1990")).thenReturn(32); // Mocking the age calculation
-
-        // Appeler la méthode à tester
-        ResponseEntity<?> responseEntity = personInfoController.getPersonInfo("John", "Doe");
-
-        // Vérifier si la réponse est OK
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-        // Vérifier les détails de la personne dans la réponse
-        Map<String, Object> expectedDetails = new HashMap<>();
-        expectedDetails.put("name", "John Doe");
-        expectedDetails.put("address", "123 Main St");
-        expectedDetails.put("email", "john@example.com");
-        expectedDetails.put("phone", "1234567890");
-        expectedDetails.put("age", 32);
-        expectedDetails.put("medications", "Medicine1, Medicine2");
-        expectedDetails.put("allergies", "Pollen");
-
-        assertEquals(expectedDetails, responseEntity.getBody());
+        mockMvc.perform(get("/childAlert")
+                        .param("address", "Mahakam")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

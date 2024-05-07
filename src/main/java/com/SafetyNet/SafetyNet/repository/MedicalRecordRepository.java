@@ -36,7 +36,7 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
     public MedicalRecord save(MedicalRecord medicalRecord) {
         logger.debug("Adding medical record: {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
         medicalRecords.add(medicalRecord);
-        logger.info("Medical record added successfully.");
+        logger.info("Medical record added successfully: {} {}.", medicalRecord.getFirstName(), medicalRecord.getLastName());
 
         return medicalRecord;
     }
@@ -61,7 +61,7 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
             existingMedicalRecord.setAllergies(medicalRecordUpdate.getAllergies());
         }
 
-        logger.info("Medical record updated successfully.");
+        logger.info("Medical record updated successfully: {} {}.", existingMedicalRecord.getFirstName(), existingMedicalRecord.getLastName());
         return existingMedicalRecord;
     }
 
@@ -70,6 +70,6 @@ public class MedicalRecordRepository implements IMedicalRecordRepository {
         // Implémentation de la suppression d'une personne par prénom et nom
         logger.debug("Deleting medical record with name: {} {}.", firstName, lastName);
         medicalRecords.removeIf(medicalRecord -> medicalRecord.getFirstName().equals(firstName) && medicalRecord.getLastName().equals(lastName));
-        logger.info("Medical record deleted successfully.");
+        logger.info("Medical record deleted successfully: {} {}.", firstName, lastName);
     }
 }
