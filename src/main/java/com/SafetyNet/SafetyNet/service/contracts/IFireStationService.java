@@ -15,8 +15,8 @@ public interface IFireStationService {
 
     public boolean deleteMapping(String address, int stationNumber);
 
-    public Map<String, Object> getResidentsAndFireStationByAddress(String address);
     public FireStationCoverage getCoverageByStationNumber(int stationNumber);
+    public Map<String, Object> getResidentsAndFireStationByAddress(String address);
     public List<Map<String, Object>> getFloodStations(List<Integer> stationNumbers);
     public List<String> getPhoneNumbersServedByFireStation(int stationNumber);
 }
