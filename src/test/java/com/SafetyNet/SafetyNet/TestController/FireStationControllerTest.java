@@ -132,7 +132,7 @@ public class FireStationControllerTest {
         when(iFireStationService.deleteMapping(anyString(), anyInt()))
                 .thenReturn(false);
 
-        mockMvc.perform(delete("/firestations/{addeess}/{stationNumber}", "Mahakam", 5))
+        mockMvc.perform(delete("/firestations/{address}/{stationNumber}", "Mahakam", 5))
                 .andExpect(status().isNotFound());
     }
 }
