@@ -30,12 +30,10 @@ public class EndpointsLogger implements HandlerInterceptor {
 
         return true;
     }
-    @Override
+
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
                                 Exception exception) throws Exception {
         int responseStatus = response.getStatus();
-
-
         switch (responseStatus) {
             case 200:
                 logger.info("Response : Status {} OK", responseStatus);
@@ -46,27 +44,26 @@ public class EndpointsLogger implements HandlerInterceptor {
                 logger.info("Response : Status {} Created - Location : {}", responseStatus, responseLocation);
                 break;
             case 204:
-                logger.info("Response : Status {} No Content - The request is fine, the response is empty.",
+                logger.info("Response : Status {} No Content.",
                         responseStatus);
                 break;
             case 400:
                 logger.error(
-                        "Response : Status {} Bad Request - The request is wrong. Please check the body and the parameters.",
+                        "Response : Status {} Bad Request.",
                         responseStatus);
                 break;
             case 404:
                 logger.error(
-                        "Response : Status {} Not Found - The request is wrong. Please check the URL, not the parameters or variables.",
+                        "Response : Status {} Not Found.",
                         responseStatus);
                 break;
             case 500:
                 logger.error(
-                        "Response : Status {} Internal Server Error - Server side problem, the request is probably fine.",
+                        "Response : Status {} Internal Server Error.",
                         responseStatus);
                 break;
             default:
                 logger.error("Status unknown");
         }
-
     }
 }
